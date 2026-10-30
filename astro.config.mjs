@@ -12,7 +12,7 @@ import rehypeInformes from './src/lib/rehype-informes.mjs';
 //   - GitHub Pages (hosting temporal): DEPLOY_TARGET=pages  -> https://osbgx.github.io/ippse-web/
 //   - cPanel / dominio propio:         (por defecto)        -> https://ippse.org.py/ (sin www; .htaccess redirige www)
 const enGitHubPages = process.env.DEPLOY_TARGET === 'pages';
-const base = enGitHubPages ? '/ippse-web' : '/';
+const base = enGitHubPages ? (process.env.PAGES_BASE || '/ippse-web') : '/';
 
 export default defineConfig({
   site: enGitHubPages ? 'https://osbgx.github.io' : 'https://ippse.org.py',
