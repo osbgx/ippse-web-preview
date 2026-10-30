@@ -1,0 +1,62 @@
+name: Deploy a GitHub Pages
+
+# Copia pública de osbgx/ippse-web solo para preview, hasta tener el hosting.
+# El deploy definitivo es en cPanel desde el repositorio original.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+        env:
+          DEPLOY_TARGET: pages
+          PAGES_BASE: /ippse-web-preview
+          PUBLIC_DOCS_REPO: osbgx/ippse-documentos
+          PUBLIC_DOCS_RAMA: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLIC_IPPSE_EMAIL: ${{ vars.PUBLIC_IPPSE_EMAIL }}
+          PUBLIC_IPPSE_TELEFONO: ${{ vars.PUBLIC_IPPSE_TELEFONO }}
+          PUBLIC_IPPSE_CIUDAD: ${{ vars.PUBLIC_IPPSE_CIUDAD }}
+          PUBLIC_IPPSE_WHATSAPP: ${{ vars.PUBLIC_IPPSE_WHATSAPP }}
+
+      # PHP y .htaccess solo sirven en cPanel; en Pages se mostrarían como texto.
+      - run: rm -f dist/*.php dist/*.inc.php dist/.htaccess
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
