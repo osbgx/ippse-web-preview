@@ -1,0 +1,24 @@
+---
+// Campos anti-abuso para los formularios (los valida public/proteccion.inc.php):
+// - Trampa: un campo invisible que solo completan los bots.
+// - "abierto": cuándo se abrió la página; un envío en menos de 3 s es automático.
+// - Cloudflare Turnstile, solo si PUBLIC_TURNSTILE_SITEKEY está definida.
+const sitekey = (import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? '').trim();
+---
+
+<div class="hidden" aria-hidden="true">
+  <label>No completar <input name="sitio_web" type="text" tabindex="-1" autocomplete="off" /></label>
+</div>
+<input type="hidden" name="abierto" value="" data-abierto />
+
+{sitekey && (
+  <>
+    <div class="cf-turnstile" data-sitekey={sitekey} data-language="es" data-theme="light"></div>
+    <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  </>
+)}
+
+<script>
+  const ahora = String(Date.now());
+  document.querySelectorAll<HTMLInputElement>('[data-abierto]').forEach((campo) => (campo.value ||= ahora));
+</script>

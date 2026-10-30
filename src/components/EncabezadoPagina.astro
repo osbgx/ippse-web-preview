@@ -1,0 +1,44 @@
+---
+import { conBase } from '../lib/rutas';
+// Banda de título para páginas internas, con migas de pan.
+interface Miga {
+  etiqueta: string;
+  href: string;
+}
+
+interface Props {
+  titulo: string;
+  bajada?: string;
+  /** Niveles intermedios entre "Inicio" y la página actual. */
+  migas?: Miga[];
+  /** Etiqueta superior (p. ej. "Prensa y Novedades"). */
+  antetitulo?: string;
+  /** Etiqueta y ruta del primer nivel de la miga (en páginas espejo: "Home" → /en/). */
+  inicioEtiqueta?: string;
+  inicioHref?: string;
+}
+
+const { titulo, bajada, migas = [], antetitulo, inicioEtiqueta = 'Inicio', inicioHref } = Astro.props;
+---
+
+<div class="border-b border-gray-200 bg-white">
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
+    <nav aria-label="Migas de pan" class="text-sm text-gray-500 print:hidden">
+      <ol class="flex flex-wrap items-center gap-2">
+        <li><a href={inicioHref ?? conBase('/')}>{inicioEtiqueta}</a></li>
+        {migas.map(({ etiqueta, href }) => (
+          <>
+            <li aria-hidden="true">/</li>
+            <li><a href={href}>{etiqueta}</a></li>
+          </>
+        ))}
+        <li aria-hidden="true">/</li>
+        <li aria-current="page" class="text-gray-700">{titulo}</li>
+      </ol>
+    </nav>
+    {antetitulo && <p class="font-serif mt-5 text-sm font-semibold text-py-rojo">{antetitulo}</p>}
+    <h1 class="mt-3 border-l-4 border-py-rojo pl-4 text-2xl font-bold sm:text-3xl md:text-4xl">{titulo}</h1>
+    {bajada && <p class="mt-3 max-w-3xl pl-5 text-base text-gray-600 sm:text-lg">{bajada}</p>}
+    <slot />
+  </div>
+</div>

@@ -1,0 +1,50 @@
+---
+// Botón que copia la cita sugerida de una publicación al portapapeles.
+// La cita va en `data-cita`; el visor la completa en el cliente.
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  cita?: string;
+  /** Texto accesible extra (p. ej. el título), para distinguir botones en un listado. */
+  contexto?: string;
+  class?: string;
+}
+
+const { cita = '', contexto, class: clase } = Astro.props;
+---
+
+<button
+  type="button"
+  data-copiar-cita={cita}
+  class:list={['inline-flex items-center gap-1.5 font-semibold', clase]}
+>
+  <Icon name="lucide:quote" class="h-4 w-4" aria-hidden="true" />
+  <span data-copiar-cita-texto>Copiar cita</span>
+  {contexto && <span class="sr-only">de {contexto}</span>}
+</button>
+
+<script>
+  // Delegado: un solo listener sirve para todos los botones de la página.
+  document.addEventListener('click', async (evento) => {
+    const boton = (evento.target as Element | null)?.closest<HTMLButtonElement>('[data-copiar-cita]');
+    if (!boton) return;
+    const cita = boton.dataset.copiarCita ?? '';
+    if (!cita) return;
+
+    let copiado = false;
+    try {
+      await navigator.clipboard.writeText(cita);
+      copiado = true;
+    } catch {
+      // Sin permiso de portapapeles (http, navegadores viejos): se muestra para copiar a mano.
+      window.prompt('Copiá la cita:', cita);
+    }
+
+    const texto = boton.querySelector('[data-copiar-cita-texto]');
+    if (copiado && texto) {
+      texto.textContent = 'Cita copiada';
+      boton.setAttribute('aria-live', 'polite');
+      window.setTimeout(() => (texto.textContent = 'Copiar cita'), 2500);
+    }
+  });
+</script>

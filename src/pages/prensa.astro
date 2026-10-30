@@ -1,0 +1,202 @@
+---
+import { conBase } from '../lib/rutas';
+import { Icon } from 'astro-icon/components';
+import LayoutBase from '../layouts/LayoutBase.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import ListaConScrollPaginada from '../components/ListaConScrollPaginada.astro';
+import { getComunicados, getApariciones, getEventos, fechaCorta } from '../data/prensa';
+
+/** Elementos por página en cada sección. */
+const POR_PAGINA = 6;
+
+const comunicados = await getComunicados();
+const apariciones = await getApariciones();
+const { proximos, pasados } = await getEventos();
+
+const secciones = [
+  { id: 'comunicados', titulo: 'Comunicados de prensa' },
+  { id: 'medios', titulo: 'Apariciones en medios' },
+  { id: 'eventos', titulo: 'Eventos, foros y debates' },
+];
+---
+
+<LayoutBase
+  titulo="Prensa y Novedades"
+  descripcion="Comunicados de prensa, apariciones en medios y agenda de eventos, foros y debates del IPPSE."
+>
+  <EncabezadoPagina titulo="Prensa y Novedades">
+    <nav aria-label="Secciones de prensa" class="mt-6 -mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+      {secciones.map(({ id, titulo }) => (
+        <a href={`#${id}`} class="font-serif inline-flex min-h-11 shrink-0 snap-start items-center whitespace-nowrap rounded-full border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 no-underline hover:border-py-azul hover:text-py-azul">
+          {titulo}
+        </a>
+      ))}
+    </nav>
+  </EncabezadoPagina>
+
+  <div class="mx-auto grid grid-cols-1 max-w-7xl gap-12 px-4 py-10 sm:px-6 md:py-14 lg:grid-cols-[minmax(0,1fr)_20rem] lg:px-8">
+    <div class="space-y-14">
+      <!-- Comunicados: buscador por título + scroll interno + paginado -->
+      <section id="comunicados" aria-labelledby="comunicados-titulo">
+        <h2 id="comunicados-titulo" class="border-b-2 border-py-azul pb-2 text-2xl font-bold sm:text-3xl">Comunicados de prensa</h2>
+        <ListaConScrollPaginada
+          id="comunicados"
+          porPagina={POR_PAGINA}
+          maxAlto="max-h-[34rem]"
+          singular="comunicado"
+          plural="comunicados"
+          etiquetaScroll="Comunicados de prensa"
+          buscador
+          placeholder="Buscar comunicados por título…"
+        >
+          {comunicados.map(({ id, fecha, titulo, extracto }) => (
+            <article id={id} data-titulo={titulo} class="group relative scroll-mt-6 rounded border border-gray-200 border-l-4 border-l-py-rojo bg-white p-5 shadow-sm transition-shadow hover:shadow-md target:ring-2 target:ring-py-rojo target:ring-offset-2 sm:p-6">
+              <time datetime={fecha} class="font-serif text-sm font-semibold text-gray-500">{fechaCorta(fecha)}</time>
+              <h3 class="mt-2 text-lg font-semibold leading-snug sm:text-xl">
+                <a href={conBase(`/prensa/${id}/`)} class="text-gray-900 no-underline after:absolute after:inset-0 group-hover:text-py-azul">
+                  {titulo}
+                </a>
+              </h3>
+              <p class="mt-2 text-sm leading-relaxed text-gray-600 sm:text-base">{extracto}</p>
+              <p class="mt-3 text-sm font-semibold text-py-rojo">Leer comunicado →</p>
+            </article>
+          ))}
+        </ListaConScrollPaginada>
+      </section>
+
+      <!-- Apariciones en medios: scroll interno + paginado -->
+      <section id="medios" aria-labelledby="medios-titulo">
+        <h2 id="medios-titulo" class="border-b-2 border-py-azul pb-2 text-2xl font-bold sm:text-3xl">Apariciones en medios</h2>
+        <ListaConScrollPaginada
+          id="medios"
+          porPagina={POR_PAGINA}
+          maxAlto="max-h-[28rem]"
+          singular="aparición"
+          plural="apariciones"
+          etiquetaScroll="Apariciones en medios"
+          espaciado="filas"
+        >
+          {apariciones.map(({ medio, titulo, fecha, url }) => (
+            <div class="group relative py-4" data-titulo={titulo}>
+              <p class="font-serif flex flex-wrap items-baseline gap-x-4 text-sm font-semibold">
+                <span class="text-py-azul">{medio}</span>
+                <time datetime={fecha} class="text-gray-500">{fechaCorta(fecha)}</time>
+              </p>
+              <p class="mt-1 font-serif text-lg font-semibold leading-snug text-gray-900">
+                {url ? (
+                  <a href={url} target="_blank" rel="noopener" class="text-gray-900 no-underline after:absolute after:inset-0 group-hover:text-py-azul">
+                    {titulo}
+                    <span class="sr-only"> (abre en una pestaña nueva)</span>
+                  </a>
+                ) : (
+                  <span class="text-gray-900">{titulo}</span>
+                )}
+              </p>
+
+            </div>
+          ))}
+        </ListaConScrollPaginada>
+      </section>
+
+      <!-- Eventos: scroll interno + paginado -->
+      <section id="eventos" aria-labelledby="eventos-titulo">
+        <div class="flex flex-wrap items-end justify-between gap-x-4 gap-y-1 border-b-2 border-py-azul pb-2">
+          <h2 id="eventos-titulo" class="text-2xl font-bold sm:text-3xl">Eventos, foros y debates</h2>
+          <a href={conBase('/calendario.ics')} class="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold" title="Copiá este enlace en Google Calendar, Outlook o Apple Calendar para recibir los eventos nuevos">
+            <Icon name="lucide:calendar" class="h-4 w-4" aria-hidden="true" />
+            Suscribirse al calendario
+          </a>
+        </div>
+        <ListaConScrollPaginada
+          id="eventos"
+          porPagina={POR_PAGINA}
+          maxAlto="max-h-[32rem]"
+          singular="evento"
+          plural="eventos"
+          vacio="No hay eventos programados por el momento."
+          etiquetaScroll="Eventos, foros y debates"
+          espaciado="bloques"
+        >
+          {proximos.length > 0 && (
+            <p
+              data-fijo="proximos"
+              class="font-serif sticky top-0 z-10 -mx-4 border-b border-gray-200 bg-gray-50 px-4 py-2 text-sm font-semibold text-py-rojo sm:-mx-5 sm:px-5"
+            >
+              Próximos
+            </p>
+          )}
+
+          {proximos.map(({ id, fecha, tipoEvento, titulo, lugar }) => {
+            const d = new Date(fecha);
+            return (
+              <article data-titulo={titulo} data-grupo="proximos" class="group relative flex gap-4 border-b border-gray-200 bg-white p-4 last:border-b-0 hover:bg-py-azul-claro/40 sm:gap-6 sm:p-5">
+                <time datetime={fecha} class="flex w-16 shrink-0 flex-col items-center justify-center rounded bg-py-azul py-2 text-white sm:w-20">
+                  <span class="font-serif text-2xl font-bold leading-none sm:text-3xl">{String(d.getUTCDate()).padStart(2, '0')}</span>
+                  <span class="font-serif mt-1 text-sm font-semibold">
+                    {d.toLocaleDateString('es-PY', { month: 'short', timeZone: 'UTC' }).replace('.', '')} {d.getUTCFullYear()}
+                  </span>
+                </time>
+                <div class="min-w-0">
+                  <p class="font-serif text-sm font-semibold text-py-rojo">{tipoEvento}</p>
+                  <h3 class="mt-1 text-base font-semibold leading-snug sm:text-lg">
+                    <a href={conBase(`/prensa/${id}/`)} class="text-gray-900 no-underline after:absolute after:inset-0 group-hover:text-py-azul">{titulo}</a>
+                  </h3>
+                  <p class="mt-1 text-sm text-gray-600">{lugar}</p>
+                  <a href={conBase(`/prensa/${id}.ics`)} download class="relative z-10 mt-1 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold">
+                    <Icon name="lucide:calendar-plus" class="h-4 w-4" aria-hidden="true" />
+                    Agregar a mi calendario
+                    <span class="sr-only">: {titulo}</span>
+                  </a>
+                </div>
+              </article>
+            );
+          })}
+
+          {pasados.length > 0 && (
+            <p
+              data-fijo="pasados"
+              class="font-serif sticky top-0 z-10 -mx-4 border-y border-gray-200 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-500 sm:-mx-5 sm:px-5"
+            >
+              Realizados
+            </p>
+          )}
+
+          {pasados.map(({ id, fecha, tipoEvento, titulo, lugar }) => {
+            const d = new Date(fecha);
+            return (
+              <article data-titulo={titulo} data-grupo="pasados" class="group relative flex gap-4 border-b border-gray-200 bg-gray-50 p-4 last:border-b-0 hover:bg-gray-100 sm:gap-6 sm:p-5">
+                <time datetime={fecha} class="flex w-16 shrink-0 flex-col items-center justify-center rounded bg-gray-300 py-2 text-gray-700 sm:w-20">
+                  <span class="font-serif text-2xl font-bold leading-none sm:text-3xl">{String(d.getUTCDate()).padStart(2, '0')}</span>
+                  <span class="font-serif mt-1 text-sm font-semibold">
+                    {d.toLocaleDateString('es-PY', { month: 'short', timeZone: 'UTC' }).replace('.', '')} {d.getUTCFullYear()}
+                  </span>
+                </time>
+                <div class="min-w-0">
+                  <p class="font-serif text-sm font-semibold text-gray-500">{tipoEvento}</p>
+                  <h3 class="mt-1 text-base font-semibold leading-snug sm:text-lg">
+                    <a href={conBase(`/prensa/${id}/`)} class="text-gray-700 no-underline after:absolute after:inset-0 group-hover:text-py-azul">{titulo}</a>
+                  </h3>
+                  <p class="mt-1 text-sm text-gray-500">{lugar}</p>
+                </div>
+              </article>
+            );
+          })}
+        </ListaConScrollPaginada>
+      </section>
+    </div>
+
+    <!-- Contacto de prensa -->
+    <aside class="lg:sticky lg:top-6 lg:self-start" aria-labelledby="prensa-contacto-titulo">
+      <div class="rounded border-l-8 border-py-rojo bg-py-azul p-6 text-white">
+        <h2 id="prensa-contacto-titulo" class="text-xl font-bold text-white">¿Periodista o medio de comunicación?</h2>
+        <p class="mt-2 text-gray-100">Contactá con nuestro equipo de prensa.</p>
+        <a href={conBase('/contacto/#formulario')} class="font-serif mt-5 flex min-h-11 items-center justify-center rounded bg-white px-5 font-semibold text-py-azul no-underline hover:bg-py-azul-claro">
+          Contactar
+        </a>
+        <a href={conBase('/prensa/kit/')} class="font-serif mt-3 flex min-h-11 items-center justify-center rounded border border-white/60 px-5 font-semibold text-white no-underline hover:bg-white/10">
+          Kit de prensa
+        </a>
+      </div>
+    </aside>
+  </div>
+</LayoutBase>

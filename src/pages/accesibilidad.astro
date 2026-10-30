@@ -1,0 +1,48 @@
+---
+import PaginaPolitica from '../components/PaginaPolitica.astro';
+import { conBase } from '../lib/rutas';
+import { contacto } from '../data/contacto';
+---
+
+<PaginaPolitica
+  titulo="Declaración de accesibilidad"
+  descripcion="El compromiso del IPPSE con un sitio usable por todas las personas, según las pautas WCAG 2.2."
+  actualizado="2026-10-24"
+>
+  <h2>Compromiso</h2>
+  <p>
+    El IPPSE quiere que su información técnica llegue a toda la ciudadanía. Por eso este sitio se desarrolla siguiendo
+    las Pautas de Accesibilidad para el Contenido Web (WCAG) 2.2, con el nivel AA como objetivo.
+  </p>
+
+  <h2>Estado de cumplimiento</h2>
+  <p>El sitio es <strong>parcialmente conforme</strong> con WCAG 2.2 nivel AA: la mayor parte cumple, con las excepciones que se detallan más abajo.</p>
+
+  <h2>Qué hicimos</h2>
+  <ul>
+    <li>Estructura semántica con títulos ordenados, regiones y migas de pan.</li>
+    <li>Enlace “Saltar al contenido” y navegación completa con teclado, con el foco siempre visible.</li>
+    <li>Contraste de colores suficiente y textos que pueden ampliarse sin perder contenido.</li>
+    <li>Diseño adaptable: se usa en celulares, tabletas y computadoras sin desplazamiento horizontal.</li>
+    <li>Áreas de toque de al menos 44 × 44 píxeles en botones y enlaces.</li>
+    <li>Textos alternativos en imágenes y etiquetas en todos los campos del formulario.</li>
+    <li>Animaciones reducidas para quienes lo configuran en su dispositivo.</li>
+  </ul>
+
+  <h2>Limitaciones conocidas</h2>
+  <ul>
+    <li>
+      Algunos PDF oficiales son copias escaneadas de documentos históricos y pueden no ser legibles por lectores de
+      pantalla. Su contenido está disponible como texto en la página <a href={conBase('/institucional/')}>Institucional</a>{" "}
+      y en el visor de cada informe.
+    </li>
+    <li>Los diagramas de los informes pueden resultar difíciles de interpretar sin verlos; el texto que los acompaña describe lo que muestran.</li>
+  </ul>
+
+  <h2>Contacto</h2>
+  <p>
+    Si encontrás una barrera de accesibilidad o necesitás un contenido en otro formato, escribinos a{" "}
+    <a href={`mailto:${contacto.email}`}>{contacto.email}</a> o mediante el <a href={conBase('/contacto/#formulario')}>formulario de contacto</a>.
+    Te responderemos y buscaremos una solución.
+  </p>
+</PaginaPolitica>

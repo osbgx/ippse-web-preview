@@ -1,0 +1,118 @@
+---
+// Gráfico de barras horizontales (valor) o de rangos (mínimo-máximo), en HTML+CSS.
+//
+// Una sola serie: un único color (--grafico-serie), sin leyenda; el título dice qué
+// se grafica. Valores en la punta de cada barra, eje con marcas redondas, línea de
+// referencia opcional y tabla con los mismos datos (accesible y copiable).
+// Las etiquetas largas van arriba de la barra en móvil y a la izquierda desde sm.
+import { escala, formatoNumero, type ConjuntoDatos } from '../data/datos';
+
+interface Props {
+  datos: ConjuntoDatos;
+}
+
+const { datos } = Astro.props;
+const { id, forma, unidad, filas, referencia, columnas } = datos;
+const maximo = Math.max(...filas.map((f) => f.hasta), referencia?.valor ?? 0);
+const { tope, marcas } = escala(maximo);
+const pct = (v: number) => `${(v / tope) * 100}%`;
+const rotulo = (f: (typeof filas)[number]) =>
+  forma === 'rango' && f.desde !== f.hasta
+    ? `${formatoNumero(f.desde)} a ${formatoNumero(f.hasta)} ${unidad}`
+    : `${formatoNumero(f.hasta)} ${unidad}`;
+---
+
+<figure class="grafico" aria-labelledby={`${id}-titulo`} aria-describedby={`${id}-desc`}>
+  <!-- Filas: etiqueta + pista con la barra; el valor va pegado a la punta -->
+  <div class="relative" role="img" aria-label={`${datos.titulo}. Los valores están en la tabla de abajo.`}>
+    <ol class="space-y-3 sm:space-y-2">
+      {filas.map((f) => (
+        <li class="grafico-fila grid grid-cols-1 gap-1 sm:grid-cols-[13rem_minmax(0,1fr)] sm:items-center sm:gap-4" title={`${f.etiqueta}: ${rotulo(f)}`}>
+          <span class="text-sm leading-snug text-gray-800 sm:text-right">{f.etiqueta}</span>
+          <span class="relative mr-[7.5rem] block h-6">
+            <span
+              class="grafico-barra absolute inset-y-0.5"
+              style={`left:${pct(forma === 'rango' ? f.desde : 0)};width:${pct((forma === 'rango' ? f.hasta - f.desde : f.hasta) || tope * 0.004)}`}
+            ></span>
+            <span
+              class="absolute inset-y-0 flex items-center pl-2 text-sm font-semibold whitespace-nowrap text-gray-900 tabular-nums"
+              style={`left:${pct(f.hasta)}`}
+            >{rotulo(f)}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
+
+    <!-- Eje y línea de referencia, alineados con la columna de las pistas -->
+    <div class="mt-2 grid grid-cols-1 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4" aria-hidden="true">
+      <span class="hidden sm:block"></span>
+      <div class="relative mr-[7.5rem] h-6 border-t border-gray-300 text-xs text-gray-500 tabular-nums">
+        {marcas.map((m, i) => (
+          <span class:list={['absolute top-1', i === 0 ? '' : i === marcas.length - 1 ? '-translate-x-full' : '-translate-x-1/2']} style={`left:${pct(m)}`}>
+            {formatoNumero(m)}
+          </span>
+        ))}
+      </div>
+    </div>
+    {referencia && (
+      <div class="pointer-events-none absolute inset-0 hidden sm:grid sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4" aria-hidden="true">
+        <span class="hidden sm:block"></span>
+        <span class="relative mr-[7.5rem]">
+          <span class="absolute -top-1 bottom-8 border-l-2 border-dashed border-py-rojo" style={`left:${pct(referencia.valor)}`}></span>
+        </span>
+      </div>
+    )}
+  </div>
+  <p class="mt-1 text-sm text-gray-600 sm:pl-[14rem]">
+    {unidad.charAt(0).toUpperCase() + unidad.slice(1)}
+    {referencia && (
+      <span class="mt-1 hidden items-center gap-2 text-gray-700 sm:flex">
+        <span class="inline-block h-3 border-l-2 border-dashed border-py-rojo" aria-hidden="true"></span>
+        {referencia.texto}
+      </span>
+    )}
+  </p>
+
+  <details class="mt-4 text-sm">
+    <summary class="inline-flex min-h-11 cursor-pointer items-center font-semibold text-py-azul">Ver los datos en tabla</summary>
+    <div class="overflow-x-auto">
+      <table class="mt-2 w-full text-left">
+        <thead>
+          <tr class="border-b border-gray-300 text-gray-500">
+            {columnas.map((c, i) => <th scope="col" class:list={['py-1.5 pr-4 font-semibold', i > 0 && 'text-right']}>{c}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {filas.map((f) => (
+            <tr class="border-b border-gray-200">
+              <th scope="row" class="py-1.5 pr-4 font-normal text-gray-800">{f.etiqueta}</th>
+              <td class="py-1.5 pr-4 text-right tabular-nums">{formatoNumero(f.desde)}</td>
+              {forma === 'rango' && <td class="py-1.5 text-right tabular-nums">{formatoNumero(f.hasta)}</td>}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </details>
+</figure>
+
+<style>
+  .grafico {
+    /* Serie única: azul de la bandera paraguaya (@theme py-azul, #0038a8);
+       contraste 9.9:1 sobre el fondo y sobre el blanco. */
+    --grafico-serie: var(--color-py-azul);
+  }
+  .grafico-barra {
+    background: var(--grafico-serie);
+    border-radius: 4px;
+  }
+  /* Hover/foco: la fila activa queda al frente y el resto se atenúa. */
+  .grafico ol:hover .grafico-fila:not(:hover) {
+    opacity: 0.55;
+  }
+  @media (forced-colors: active) {
+    .grafico-barra {
+      background: CanvasText;
+    }
+  }
+</style>

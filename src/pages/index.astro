@@ -1,0 +1,304 @@
+---
+import { conBase } from '../lib/rutas';
+import { Icon } from 'astro-icon/components';
+import LayoutBase from '../layouts/LayoutBase.astro';
+import TarjetaPublicacion from '../components/TarjetaPublicacion.astro';
+import {
+  lema, descripcionCorta, presentacionHero, quienesSomos, mision, vision, valores,
+  ejesEstrategicos, membresia, enlacesRapidos,
+} from '../data/institucion';
+import { getPublicaciones, urlVisor, atributosPdf } from '../data/publicaciones';
+import { informeDestacado } from '../data/informeDestacado';
+import { pdfInforme226 } from '../data/documentos';
+import { enlaceMembresia } from '../data/contacto';
+
+const recientes = (await getPublicaciones()).slice(0, 3);
+---
+
+<LayoutBase titulo="Inicio" descripcion={`${lema} ${descripcionCorta}`}>
+  <!-- Hero -->
+  <section aria-labelledby="hero-titulo" class="relative overflow-hidden border-b border-gray-200 bg-white">
+    <div class="absolute inset-y-0 right-0 hidden w-1/2 lg:block" aria-hidden="true">
+      <img
+        src={conBase('/assets/power-paraguay/22a32298a_generated_43a648f3.webp')}
+        alt=""
+        class="h-full w-full object-cover"
+        loading="lazy"
+      />
+      <div class="absolute inset-0 bg-gradient-to-r from-white via-white/60 to-transparent"></div>
+    </div>
+    <div class="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-24 lg:px-8">
+      <div class="max-w-2xl">
+        <h1 id="hero-titulo" class="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
+          Instituto de Profesionales Paraguayos del Sector Eléctrico
+        </h1>
+        <p class="mt-6 max-w-xl text-base leading-relaxed text-gray-700 sm:text-lg">{presentacionHero}</p>
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
+          <a href={conBase('/publicaciones/')} class="font-serif rounded bg-py-azul px-6 py-3 text-center font-semibold text-white no-underline hover:bg-py-azul-oscuro hover:text-white">
+            Ver informes técnicos
+          </a>
+          <a href={conBase('/nosotros/')} class="font-serif rounded border-2 border-py-rojo px-6 py-3 text-center font-semibold text-py-rojo no-underline hover:bg-py-rojo hover:text-white">
+            Conocer el IPPSE
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Enlaces rápidos -->
+  <section aria-label="Enlaces rápidos" class="border-b border-gray-200 bg-white">
+    <div class="mx-auto max-w-7xl px-4 pt-5 pb-10 sm:px-6 md:pt-6 md:pb-12 lg:px-8">
+      <!-- Índice de accesos: columnas separadas por filetes, sin cajas -->
+      <ul class="grid grid-cols-1 divide-y divide-gray-200 border-y border-gray-200 sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x lg:border-y-0">
+        {enlacesRapidos.map(({ titulo, descripcion, href, archivo }) => (
+          <li class="sm:[&:nth-child(n+3)]:border-t sm:[&:nth-child(n+3)]:border-gray-200 lg:[&:nth-child(n+3)]:border-t-0">
+            <a
+              href={href}
+              target={archivo ? '_blank' : undefined}
+              rel={archivo ? 'noopener' : undefined}
+              class="group block py-4 no-underline lg:px-6 lg:py-1 lg:first:pl-0"
+            >
+              <span class="block font-serif text-lg font-semibold text-gray-900 underline decoration-transparent underline-offset-4 group-hover:text-py-azul group-hover:decoration-py-rojo">{titulo}</span>
+              <span class="mt-1 block text-sm text-gray-600">{descripcion}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Informe destacado: Riesgo de crisis energética (sección de alta prioridad) -->
+  <section aria-labelledby="informe-titulo" class="border-t-4 border-t-py-rojo border-b border-gray-200 bg-white">
+    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+      <!-- Imagen de fondo: represa de Itaipú -->
+      <div class="relative mb-8 overflow-hidden rounded-lg">
+        <img
+          src={conBase('/assets/power-paraguay/726c04d4d_generated_f07a7368.webp')}
+          alt="Represa de Itaipú al atardecer"
+          width="1024"
+          height="1024"
+          class="h-48 w-full object-cover sm:h-64"
+          loading="lazy"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+        <p class="absolute bottom-4 left-4 font-serif text-lg font-semibold text-white sm:text-xl">
+          El Paraguay necesita nueva generación eléctrica desde 2028
+        </p>
+      </div>
+
+      <!-- Franja CTA: urgencia de la decisión -->
+      <div class="flex w-full flex-col gap-5 rounded bg-py-rojo p-5 sm:p-6 md:flex-row md:items-center md:justify-between">
+        <div class="flex items-start gap-4">
+          <Icon name="lucide:triangle-alert" class="h-8 w-8 shrink-0 text-white sm:h-10 sm:w-10" aria-hidden="true" />
+          <div>
+            <p class="font-serif text-3xl font-bold leading-none text-white sm:text-4xl">2028–2030</p>
+            <p class="mt-2 text-sm leading-relaxed text-white sm:text-base">
+              <strong class="font-semibold">Quedan pocos años para decidir:</strong> las alternativas más rápidas
+              (solar con baterías e interconexiones) tardan de 3 a 5 años en estar operativas, y las de mayor
+              porte, hasta 15.
+            </p>
+          </div>
+        </div>
+        <a
+          href={urlVisor(informeDestacado.id)}
+          class="font-serif inline-flex min-h-11 shrink-0 items-center justify-center rounded bg-white px-6 py-3 font-semibold text-py-rojo no-underline hover:bg-py-azul-claro hover:text-py-azul-oscuro"
+        >
+          Ver el informe y los plazos
+        </a>
+      </div>
+
+      <div class="mt-10 grid grid-cols-1 gap-10 md:mt-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-14">
+        <div>
+          <h2 id="informe-titulo" class="text-2xl font-bold leading-tight sm:text-3xl">
+            El Paraguay necesita nueva generación eléctrica desde 2028
+          </h2>
+          <p class="mt-4 leading-relaxed text-gray-700">{informeDestacado.bajada}</p>
+          <p class="mt-6 font-serif text-lg font-semibold text-py-azul">Los tres desafíos</p>
+          <!-- Los desafíos van rotulados a, b y c en el informe: se respeta esa secuencia -->
+          <ol class="mt-3 divide-y divide-gray-200 border-y border-gray-200">
+            {informeDestacado.desafios.map(({ texto }, i) => (
+              <li class="grid grid-cols-[2rem_minmax(0,1fr)] py-3">
+                <span class="font-serif text-lg font-semibold leading-snug text-py-rojo" aria-hidden="true">{String.fromCharCode(97 + i)})</span>
+                <span class="leading-relaxed text-gray-800">{texto}</span>
+              </li>
+            ))}
+          </ol>
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            <a
+              href={urlVisor(informeDestacado.id)}
+              class="font-serif inline-flex min-h-11 items-center gap-2 rounded bg-py-azul px-6 py-3 font-semibold text-white no-underline hover:bg-py-azul-oscuro"
+            >
+              Leer el informe completo
+            </a>
+            <a
+              href={pdfInforme226.href}
+              {...atributosPdf}
+              class="font-serif inline-flex min-h-11 items-center gap-2 rounded border border-py-rojo px-6 py-3 font-semibold text-py-rojo no-underline hover:bg-py-rojo hover:text-white"
+            >
+              <Icon name="lucide:download" class="h-4 w-4" aria-hidden="true" />
+              PDF oficial
+              <span class="sr-only">del Informe Técnico Nº 2/26 (abre en una pestaña nueva)</span>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <!-- Plazos de habilitación (resumen ejecutivo) -->
+          <div class="border-t-2 border-gray-900 pt-4">
+            <h3 class="font-serif text-lg font-semibold">Alternativas y plazos de habilitación</h3>
+            <div class="mt-4 overflow-x-auto" tabindex="0" role="region" aria-label="Tabla de plazos (desplazable)">
+            <table class="w-full text-left text-sm">
+              <caption class="sr-only">
+                Fuentes de generación eléctrica y plazos estimados de habilitación según el Informe Técnico Nº 2/26
+              </caption>
+              <thead>
+                <tr class="font-serif border-b border-gray-300 text-sm font-semibold text-gray-500">
+                  <th scope="col" class="py-2 pr-3">Fuente</th>
+                  <th scope="col" class="py-2 pr-3 whitespace-nowrap">Plazo</th>
+                  <th scope="col" class="py-2">Horizonte</th>
+                </tr>
+              </thead>
+              <tbody>
+                {informeDestacado.alternativas.map(({ fuente, plazo, horizonte, firme }) => (
+                  <tr class="border-b border-gray-200 last:border-0">
+                    <th scope="row" class="py-2 pr-3 font-semibold text-gray-900">{fuente}</th>
+                    <td class="py-2 pr-3 whitespace-nowrap text-gray-700">{plazo}</td>
+                    <td class="py-2 text-gray-600">
+                      {horizonte}
+                      {firme && <span class="ml-1 font-semibold text-py-azul">→ energía firme</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            </div>
+          </div>
+
+          <!-- Cifras clave -->
+          <dl class="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-gray-200 pt-5">
+            {informeDestacado.cifras.map(({ valor, etiqueta }) => (
+              <div>
+                <dt class="font-serif text-xl font-bold text-py-azul sm:text-2xl">{valor}</dt>
+                <dd class="mt-1 text-sm leading-snug text-gray-600">{etiqueta}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </div>
+
+      <!-- Cambio de paradigma -->
+      <div class="mt-10 border-t border-gray-200 pt-8 md:mt-12">
+        <p class="font-serif text-lg font-semibold text-py-azul">{informeDestacado.paradigma.titulo}</p>
+        <p class="mt-3 max-w-3xl leading-relaxed text-gray-700">{informeDestacado.paradigma.texto}</p>
+
+        <!-- Antes / Ahora: el paradigma anterior queda tachado, el nuevo en primer plano -->
+        <dl class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-10">
+          <div>
+            <dt class="font-serif text-sm font-semibold text-gray-500">Antes</dt>
+            <dd class="mt-1 font-serif text-lg font-semibold text-gray-500 line-through decoration-gray-400 decoration-1 sm:text-xl">
+              {informeDestacado.paradigma.antes}
+            </dd>
+          </div>
+          <div class="sm:border-l sm:border-gray-200 sm:pl-10">
+            <dt class="font-serif text-sm font-semibold text-py-rojo">Ahora</dt>
+            <dd class="mt-2 font-serif text-lg font-semibold text-gray-900 sm:text-xl">
+              {informeDestacado.paradigma.ahora}
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- Publicaciones recientes -->
+  <section aria-labelledby="recientes-titulo" class="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <p class="font-serif text-sm font-semibold text-py-rojo">Inteligencia técnica</p>
+        <h2 id="recientes-titulo" class="mt-3 text-2xl font-bold sm:text-3xl">Informes y publicaciones recientes</h2>
+      </div>
+      <a href={conBase('/publicaciones/')} class="inline-flex min-h-11 items-center font-semibold">Ver todos →</a>
+    </div>
+    <ul class="mt-6 grid grid-cols-1 gap-4 sm:gap-6 md:mt-8 md:grid-cols-3">
+      {recientes.map((publicacion) => <li><TarjetaPublicacion publicacion={publicacion} /></li>)}
+    </ul>
+  </section>
+
+  <!-- Quiénes somos -->
+  <section aria-labelledby="nosotros-titulo" class="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+    <div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
+      <div class="relative overflow-hidden rounded-lg">
+        <img
+          src={conBase('/assets/power-paraguay/390840802_generated_d56ac8c6.webp')}
+          alt="Sala de control eléctrico"
+          width="1200"
+          height="800"
+          class="h-64 w-full object-cover sm:h-80"
+          loading="lazy"
+        />
+      </div>
+      <div class="flex flex-col">
+        <p class="font-serif text-sm font-semibold text-py-rojo">Quiénes somos</p>
+        <h2 id="nosotros-titulo" class="mt-3 text-2xl font-bold leading-tight sm:text-3xl">{quienesSomos.titulo}</h2>
+        {quienesSomos.parrafos.map((p) => <p class="mt-4 leading-relaxed text-gray-700">{p}</p>)}
+        <a href={conBase('/nosotros/')} class="mt-4 inline-flex min-h-11 items-center font-semibold">Conocer nuestra historia →</a>
+      </div>
+    </div>
+    <!-- Misión, visión y valores: tres columnas de texto bajo un filete, sin caja -->
+    <dl class="mt-12 grid grid-cols-1 gap-8 border-t-2 border-gray-900 pt-6 md:grid-cols-3 md:gap-10">
+      <div>
+        <dt class="font-serif text-lg font-semibold text-gray-900">Misión</dt>
+        <dd class="mt-2 leading-relaxed text-gray-700">{mision}</dd>
+      </div>
+      <div>
+        <dt class="font-serif text-lg font-semibold text-gray-900">Visión</dt>
+        <dd class="mt-2 leading-relaxed text-gray-700">{vision}</dd>
+      </div>
+      <div>
+        <dt class="font-serif text-lg font-semibold text-gray-900">Valores</dt>
+        <dd class="mt-2">
+          <ul class="space-y-3">
+            {valores.map(({ titulo, descripcion }) => (
+              <li class="leading-relaxed text-gray-700">
+                <strong class="font-semibold text-gray-900">{titulo}.</strong> {descripcion}
+              </li>
+            ))}
+          </ul>
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- Ejes estratégicos -->
+  <section aria-labelledby="ejes-titulo" class="border-y border-gray-200 bg-white">
+    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+      <p class="font-serif text-sm font-semibold text-py-rojo">Ejes estratégicos</p>
+      <h2 id="ejes-titulo" class="mt-3 text-2xl font-bold sm:text-3xl">Cuatro ejes de trabajo para el sector eléctrico nacional</h2>
+      <!-- Los ejes no son una secuencia: columnas paralelas con filete superior, sin numerar -->
+      <ul class="mt-8 grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 md:mt-10 lg:grid-cols-4">
+        {ejesEstrategicos.map(({ titulo, descripcion, icono }) => (
+          <li class="border-t border-gray-300 pt-5">
+            <Icon name={icono} class="h-7 w-7 text-py-rojo" aria-hidden="true" />
+            <h3 class="mt-3 text-lg font-semibold leading-snug">{titulo}</h3>
+            <p class="mt-2 leading-relaxed text-gray-600">{descripcion}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Membresía -->
+  <section aria-labelledby="membresia-titulo" class="mx-auto max-w-7xl px-4 pt-4 sm:px-6 md:pt-8 lg:px-8">
+    <div class="flex flex-col items-start justify-between gap-6 rounded border-l-8 border-py-rojo bg-py-azul p-6 text-white sm:p-10 md:flex-row md:items-center">
+      <div>
+        <h2 id="membresia-titulo" class="text-2xl font-bold text-white sm:text-3xl">
+          {membresia.titulo} <span class="block text-py-azul-claro">{membresia.subtitulo}</span>
+        </h2>
+        <p class="mt-3 max-w-2xl text-gray-100">{membresia.texto}</p>
+      </div>
+      <a href={enlaceMembresia} class="font-serif w-full shrink-0 rounded bg-white px-6 py-3 text-center font-semibold md:w-auto text-py-azul no-underline hover:bg-py-azul-claro">
+        Solicitar membresía
+      </a>
+    </div>
+  </section>
+</LayoutBase>

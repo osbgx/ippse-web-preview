@@ -1,0 +1,125 @@
+---
+// Socios: requisitos, categorías y proceso de ingreso (textos de los Estatutos y
+// el Reglamento Interno), y el directorio de socios que autorizaron figurar.
+import { getCollection } from 'astro:content';
+import LayoutBase from '../layouts/LayoutBase.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import { conBase } from '../lib/rutas';
+import { enlaceMembresia } from '../data/contacto';
+
+const nombresCategoria = {
+  fundador: 'Miembro Fundador',
+  adherente: 'Miembro Adherente',
+  emerito: 'Miembro Emérito',
+  colectivo: 'Miembro Colectivo',
+} as const;
+
+// Directorio: agrupado por especialidad, en orden alfabético.
+const socios = (await getCollection('socios')).map((s) => s.data).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+const especialidades = [...new Set(socios.map((s) => s.especialidad))].sort((a, b) => a.localeCompare(b, 'es'));
+
+// Estatutos, art. 18 (texto literal).
+const categorias = [
+  { nombre: 'Miembros Fundadores', texto: 'los que suscribieron el Acta de Fundación del IPPSE, de fecha 23 de abril de 1993.' },
+  { nombre: 'Miembros Adherentes', texto: 'los invitados que aceptaren estos Estatutos, y que prestan o han prestado servicios destacados dentro del sector público o privado en el Sector Eléctrico del Paraguay.' },
+  { nombre: 'Miembros Eméritos', texto: 'los profesionales que se han destacado públicamente en la prestación de servicios dentro del Sector Eléctrico del Paraguay.' },
+  { nombre: 'Miembros Colectivos', texto: 'las entidades jurídicas del Sector Eléctrico del Paraguay que hubieren aceptado inscribirse como tales.' },
+];
+
+// El ingreso es una secuencia real (Estatutos arts. 15-16; Reglamento art. 12): se numera.
+const pasos = [
+  { titulo: 'Candidatura', texto: 'Dos (2) Miembros del IPPSE presentan la candidatura del profesional. Si te interesa ingresar, podés escribirnos y te orientamos.' },
+  { titulo: 'Calificación', texto: 'El Comité Ejecutivo califica al profesional, en base a los Estatutos y el Reglamento Interno.' },
+  { titulo: 'Votación', texto: 'El Comité Ejecutivo aprueba la incorporación por el sistema de bolillas blancas; la desaprobación, por bolilla negra.' },
+  { titulo: 'Invitación', texto: 'El Comité Ejecutivo invita expresamente al profesional a incorporarse como Miembro.' },
+];
+---
+
+<LayoutBase
+  titulo="Socios"
+  descripcion="Cómo ser miembro del IPPSE: requisitos, categorías, proceso de ingreso y directorio de socios."
+  claves={['membresía IPPSE', 'socios IPPSE', 'profesionales sector eléctrico Paraguay']}
+>
+  <EncabezadoPagina
+    titulo="Socios"
+    bajada="El IPPSE reúne a profesionales con trayectoria destacada en el sector eléctrico paraguayo. Así se integra el Instituto."
+  />
+
+  <div class="mx-auto max-w-5xl space-y-14 px-4 py-10 sm:px-6 md:py-14 lg:px-8">
+    <!-- Requisitos -->
+    <section aria-labelledby="requisitos-titulo">
+      <h2 id="requisitos-titulo" class="border-b-2 border-gray-900 pb-2 text-2xl font-bold">Requisitos</h2>
+      <ul class="mt-4 space-y-3 leading-relaxed text-gray-800">
+        <li>Título universitario.</li>
+        <li>
+          Haberse destacado en la prestación de servicios dentro del Sector Eléctrico del Paraguay durante por lo menos
+          quince (15) años <span class="text-gray-500">(Estatutos, art. 14)</span>.
+        </li>
+        <li>
+          No pueden ser Miembros los profesionales destituidos por delitos, faltas administrativas o negligencia
+          profesional en el ejercicio de funciones ejecutivas o de dirección <span class="text-gray-500">(art. 17)</span>.
+        </li>
+      </ul>
+    </section>
+
+    <!-- Proceso de ingreso: pasos numerados porque son una secuencia -->
+    <section aria-labelledby="proceso-titulo">
+      <h2 id="proceso-titulo" class="border-b-2 border-gray-900 pb-2 text-2xl font-bold">Cómo se ingresa</h2>
+      <ol class="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {pasos.map((p, i) => (
+          <li class="border-t border-gray-300 pt-3">
+            <span class="font-serif text-sm font-semibold text-py-rojo">Paso {i + 1}</span>
+            <h3 class="mt-1 text-lg font-semibold">{p.titulo}</h3>
+            <p class="mt-1 leading-relaxed text-gray-700">{p.texto}</p>
+          </li>
+        ))}
+      </ol>
+      <div class="mt-6 flex flex-wrap items-center gap-4">
+        <a href={enlaceMembresia} class="font-serif inline-flex min-h-11 items-center rounded bg-py-rojo px-6 font-semibold text-white no-underline hover:bg-py-rojo-oscuro">
+          Solicitar información para ingresar
+        </a>
+        <a href={conBase('/institucional/#estatutos')} class="inline-flex min-h-11 items-center font-semibold">Leer los Estatutos</a>
+      </div>
+    </section>
+
+    <!-- Categorías -->
+    <section aria-labelledby="categorias-titulo">
+      <h2 id="categorias-titulo" class="border-b-2 border-gray-900 pb-2 text-2xl font-bold">Categorías de miembros</h2>
+      <dl class="mt-4 divide-y divide-gray-200">
+        {categorias.map((c) => (
+          <div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-6">
+            <dt class="font-serif font-semibold text-gray-900">{c.nombre}</dt>
+            <dd class="leading-relaxed text-gray-700">{c.texto.charAt(0).toUpperCase() + c.texto.slice(1)}</dd>
+          </div>
+        ))}
+      </dl>
+      <p class="mt-3 text-sm text-gray-600">
+        Fuente: Estatutos, art. 18. Las condiciones de cada categoría y las cuotas están en el{" "}
+        <a href={conBase('/institucional/#reglamento-interno')}>Reglamento Interno</a>.
+      </p>
+    </section>
+
+    <!-- Directorio: solo se muestra cuando hay socios cargados con su consentimiento -->
+    {socios.length > 0 && (
+      <section aria-labelledby="directorio-titulo">
+        <h2 id="directorio-titulo" class="border-b-2 border-gray-900 pb-2 text-2xl font-bold">Directorio de socios</h2>
+        <p class="mt-2 text-sm text-gray-600">Socios que autorizaron figurar en este directorio, por especialidad.</p>
+        <div class="mt-4 grid grid-cols-1 gap-x-10 gap-y-8 md:grid-cols-2">
+          {especialidades.map((esp) => (
+            <div>
+              <h3 class="font-serif text-lg font-semibold text-gray-900">{esp}</h3>
+              <ul class="mt-2 divide-y divide-gray-200 border-t border-gray-200">
+                {socios.filter((s) => s.especialidad === esp).map((s) => (
+                  <li class="flex flex-wrap items-baseline justify-between gap-x-4 py-2">
+                    <span class="text-gray-900">{s.nombre}</span>
+                    <span class="text-sm text-gray-500">{nombresCategoria[s.categoria]}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</LayoutBase>

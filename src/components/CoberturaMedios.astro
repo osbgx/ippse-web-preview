@@ -1,0 +1,55 @@
+---
+// "Cobertura en medios": notas de prensa vinculadas a un informe (campo `informes`
+// de cada aparición). Lista simple con medio y fecha, sin tarjetas.
+import { Icon } from 'astro-icon/components';
+import { conBase } from '../lib/rutas';
+import { fechaCorta, type Cobertura } from '../data/prensa';
+
+interface Props {
+  notas: Cobertura[];
+  titulo?: string;
+  /** Enlace final, p. ej. al kit de prensa. */
+  conContacto?: boolean;
+  class?: string;
+}
+
+const { notas, titulo = 'Cobertura en medios', conContacto = true, class: clase } = Astro.props;
+---
+
+{notas.length > 0 && (
+  <section aria-label={titulo} class:list={['border-t-2 border-gray-900 pt-4', clase]}>
+    <h2 class="font-serif text-xl font-semibold text-gray-900">{titulo}</h2>
+    <p class="mt-1 text-sm text-gray-600">{notas.length} {notas.length === 1 ? 'nota cita' : 'notas citan'} este informe.</p>
+    <ul class="mt-3 divide-y divide-gray-200 border-b border-gray-200">
+      {notas.map((n) => (
+        <li>
+          <a
+            href={n.url}
+            target={n.externa ? '_blank' : undefined}
+            rel={n.externa ? 'noopener' : undefined}
+            class="group grid grid-cols-1 gap-x-6 py-3 no-underline sm:grid-cols-[8rem_minmax(0,1fr)]"
+          >
+            <span class="text-sm text-gray-500">
+              <span class="font-semibold text-py-azul">{n.medio}</span>
+              <time datetime={n.fecha} class="block">{fechaCorta(n.fecha)}</time>
+            </span>
+            <span class="text-gray-900 group-hover:text-py-azul group-hover:underline">
+              {n.titulo}
+              {n.externa && (
+                <>
+                  <Icon name="lucide:external-link" class="ml-1 inline h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
+                  <span class="sr-only">(abre en una pestaña nueva)</span>
+                </>
+              )}
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    {conContacto && (
+      <p class="mt-3 text-sm text-gray-600">
+        ¿Sos periodista? Logos, texto institucional y contacto en el <a href={conBase('/prensa/kit/')}>kit de prensa</a>.
+      </p>
+    )}
+  </section>
+)}

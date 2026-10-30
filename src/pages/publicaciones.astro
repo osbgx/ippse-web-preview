@@ -1,0 +1,270 @@
+---
+import { Icon } from 'astro-icon/components';
+import LayoutBase from '../layouts/LayoutBase.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import TarjetaPublicacion from '../components/TarjetaPublicacion.astro';
+import { categorias, getPublicaciones, type Categoria } from '../data/publicaciones';
+import { canalWhatsApp } from '../data/contacto';
+
+const publicacionesOrdenadas = await getPublicaciones();
+
+// Filtros del archivo: solo categorías y años que tienen publicaciones (años del más reciente al más antiguo).
+const categoriasPresentes = (Object.keys(categorias) as Categoria[]).filter((c) =>
+  publicacionesOrdenadas.some((p) => p.categoria === c),
+);
+const anios = [...new Set(publicacionesOrdenadas.map((p) => p.fecha.slice(0, 4)))].sort().reverse();
+
+const descripcion =
+  'Repositorio de diagnósticos, propuestas estratégicas y ensayos técnicos elaborados por el IPPSE ' +
+  'para el fortalecimiento del sector eléctrico nacional.';
+
+/** Publicaciones por página del paginado. */
+const POR_PAGINA = 6;
+
+// Datos estructurados para buscadores (schema.org): se suman al grafo de LayoutBase.
+// Cada informe enlaza a su PDF oficial cuando existe (el visor no se indexa).
+const raiz = new URL(import.meta.env.BASE_URL, Astro.site).href;
+const jsonLd = {
+  '@type': 'ItemList',
+  '@id': `${new URL(Astro.url.pathname, Astro.site).href}#informes`,
+  name: 'Informes y Publicaciones del IPPSE',
+  itemListElement: publicacionesOrdenadas.map((p, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    item: {
+      '@type': 'Report',
+      name: p.titulo,
+      datePublished: p.fecha,
+      abstract: p.extracto,
+      inLanguage: 'es-PY',
+      author: { '@type': 'Organization', name: p.autor },
+      publisher: { '@id': `${raiz}#organizacion` },
+      url: new URL(p.pdf ?? Astro.url.pathname, Astro.site).href,
+      ...(p.pdf && { encodingFormat: 'application/pdf' }),
+    },
+  })),
+};
+---
+
+<LayoutBase
+  titulo="Informes y Publicaciones"
+  descripcion={descripcion}
+  schema={[jsonLd]}
+  claves={['informes técnicos', 'diagnósticos energéticos', 'propuestas sector eléctrico']}
+>
+
+  <EncabezadoPagina titulo="Informes y Publicaciones" bajada={descripcion} />
+
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-12 lg:px-8">
+    <!-- Buscador por título: mejora progresiva, sin JS se ven todas las publicaciones -->
+    <form role="search" class="hidden" data-buscador-form novalidate>
+      <label for="buscar-titulo" class="block text-sm font-semibold text-gray-700">Buscar por título</label>
+      <div class="relative mt-2 max-w-xl">
+        <Icon name="lucide:search" class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+        <input
+          type="search"
+          id="buscar-titulo"
+          name="q"
+          autocomplete="off"
+          placeholder="Escribí palabras del título…"
+          class="min-h-12 w-full rounded border border-gray-300 bg-white py-3 pl-12 pr-4 text-base text-gray-900 placeholder:text-gray-400 focus:border-py-azul focus:outline-none focus:ring-1 focus:ring-py-azul"
+          data-buscador
+        />
+      </div>
+
+      <!-- Archivo: filtros por categoría y año (se reflejan en la URL para poder compartirlos) -->
+      <div class="mt-4 flex flex-wrap gap-x-6 gap-y-3">
+        <div>
+          <label for="filtro-categoria" class="block text-sm font-semibold text-gray-700">Categoría</label>
+          <select id="filtro-categoria" name="categoria" class="mt-1 min-h-11 rounded border border-gray-300 bg-white px-3 text-base text-gray-900" data-filtro="categoria">
+            <option value="">Todas</option>
+            {categoriasPresentes.map((c) => <option value={c}>{categorias[c]}</option>)}
+          </select>
+        </div>
+        <div>
+          <label for="filtro-anio" class="block text-sm font-semibold text-gray-700">Año</label>
+          <select id="filtro-anio" name="anio" class="mt-1 min-h-11 rounded border border-gray-300 bg-white px-3 text-base text-gray-900" data-filtro="anio">
+            <option value="">Todos</option>
+            {anios.map((a) => <option value={a}>{a}</option>)}
+          </select>
+        </div>
+      </div>
+    </form>
+
+    {anios.length > 0 && (
+      <p class="mt-6 text-sm text-gray-600">
+        Archivo de informes del IPPSE{anios.length > 1 ? ` de ${anios.at(-1)} a ${anios[0]}` : ` de ${anios[0]}`}. El Instituto trabaja desde 1993.
+      </p>
+    )}
+
+    <p class="mt-6 text-sm text-gray-500" aria-live="polite" data-contador>
+      {publicacionesOrdenadas.length} publicaciones
+    </p>
+
+    <ul class="mt-4 grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3" data-lista>
+      {publicacionesOrdenadas.map((publicacion) => (
+        <li data-titulo={publicacion.titulo} data-categoria={publicacion.categoria} data-anio={publicacion.fecha.slice(0, 4)}>
+          <TarjetaPublicacion publicacion={publicacion} nivel="h2" />
+        </li>
+      ))}
+    </ul>
+
+    <!-- Sin resultados -->
+    <p class="hidden rounded border border-gray-200 bg-gray-50 p-6 text-center text-gray-600" data-sin-resultados>
+      No hay publicaciones que coincidan con la búsqueda y los filtros elegidos.
+    </p>
+
+    <!-- Paginado -->
+    <nav class="mt-8 hidden justify-center print:hidden" aria-label="Paginación de publicaciones" data-paginado>
+      <ul class="flex flex-wrap items-center gap-1" data-paginado-lista></ul>
+    </nav>
+
+    <!-- Invitación al canal de WhatsApp -->
+    <aside class="mt-10 rounded border border-gray-200 border-t-4 border-t-[#25D366] bg-gray-50 p-6 sm:p-8" aria-labelledby="wa-titulo">
+      <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div class="max-w-2xl">
+          <h2 id="wa-titulo" class="flex items-center gap-2 font-serif text-xl font-semibold text-gray-900 sm:text-2xl">
+            <Icon name="simple-icons:whatsapp" class="h-6 w-6 shrink-0 text-[#25D366]" aria-hidden="true" />
+            Recibí los informes y participá
+          </h2>
+          <p class="mt-3 leading-relaxed text-gray-700">
+            Sumate al canal de WhatsApp del IPPSE para recibir los informes técnicos y las novedades
+            del sector eléctrico, y participar en las iniciativas de participación ciudadana.
+          </p>
+        </div>
+        <a
+          href={canalWhatsApp}
+          target="_blank"
+          rel="noopener"
+          class="font-serif inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded bg-[#075E54] px-6 py-3 font-semibold text-white no-underline hover:bg-[#053f39]"
+        >
+          <Icon name="simple-icons:whatsapp" class="h-5 w-5 text-[#25D366]" aria-hidden="true" />
+          Unirme al canal de WhatsApp
+          <span class="sr-only">(abre en una pestaña nueva)</span>
+        </a>
+      </div>
+    </aside>
+  </div>
+
+  <script type="application/json" id="pub-config" set:html={JSON.stringify({ porPagina: POR_PAGINA })} />
+</LayoutBase>
+
+<script>
+  const POR_PAGINA =
+    JSON.parse(document.getElementById('pub-config')?.textContent ?? '{}').porPagina ?? 6;
+
+  const form = document.querySelector<HTMLFormElement>('[data-buscador-form]');
+  const input = document.querySelector<HTMLInputElement>('[data-buscador]');
+  const items = [...document.querySelectorAll<HTMLElement>('[data-lista] > li')];
+  const contador = document.querySelector<HTMLElement>('[data-contador]');
+  const sinResultados = document.querySelector<HTMLElement>('[data-sin-resultados]');
+  const paginado = document.querySelector<HTMLElement>('[data-paginado]');
+  const paginadoLista = document.querySelector<HTMLElement>('[data-paginado-lista]');
+
+  /** Normaliza texto: minúsculas y sin tildes, para buscar "transmision" en "Transmisión". */
+  const normalizar = (texto: string) =>
+    texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '');
+
+  const titulos = items.map((item) => normalizar(item.dataset.titulo ?? ''));
+  const filtros = [...document.querySelectorAll<HTMLSelectElement>('[data-filtro]')];
+
+  // Filtros iniciales desde la URL (/publicaciones/?categoria=propuesta&anio=2024).
+  const parametros = new URLSearchParams(location.search);
+  filtros.forEach((f) => {
+    const valor = parametros.get(f.dataset.filtro!);
+    if (valor && [...f.options].some((o) => o.value === valor)) f.value = valor;
+  });
+
+  let termino = '';
+  let pagina = 1;
+
+  const cumpleFiltros = (item: HTMLElement) =>
+    filtros.every((f) => !f.value || item.dataset[f.dataset.filtro === 'anio' ? 'anio' : 'categoria'] === f.value);
+
+  /** Refleja los filtros en la URL sin recargar, para poder compartir el enlace. */
+  const actualizarUrl = () => {
+    const url = new URL(location.href);
+    filtros.forEach((f) => (f.value ? url.searchParams.set(f.dataset.filtro!, f.value) : url.searchParams.delete(f.dataset.filtro!)));
+    history.replaceState(null, '', url);
+  };
+
+  filtros.forEach((f) =>
+    f.addEventListener('change', () => {
+      pagina = 1;
+      actualizarUrl();
+      render();
+    }),
+  );
+
+  function render() {
+    const coincidencias = items.filter((item, i) => titulos[i].includes(termino) && cumpleFiltros(item));
+    const totalPaginas = Math.max(1, Math.ceil(coincidencias.length / POR_PAGINA));
+    if (pagina > totalPaginas) pagina = totalPaginas;
+
+    const inicio = (pagina - 1) * POR_PAGINA;
+    const visibles = new Set(coincidencias.slice(inicio, inicio + POR_PAGINA));
+
+    items.forEach((item) => (item.hidden = !visibles.has(item)));
+
+    if (contador) {
+      const n = coincidencias.length;
+      contador.textContent = termino
+        ? `${n} ${n === 1 ? 'publicación' : 'publicaciones'} para “${input?.value.trim()}”`
+        : `${n} ${n === 1 ? 'publicación' : 'publicaciones'}`;
+    }
+
+    sinResultados?.classList.toggle('hidden', coincidencias.length > 0);
+
+    // Paginado: solo si hay más de una página
+    if (paginado && paginadoLista) {
+      paginadoLista.replaceChildren();
+      paginado.classList.toggle('hidden', totalPaginas <= 1);
+      paginado.classList.toggle('flex', totalPaginas > 1);
+      if (totalPaginas > 1) {
+        const boton = (texto: string, destino: number, actual: boolean, etiqueta?: string) => {
+          const li = document.createElement('li');
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = texto;
+          if (etiqueta) b.setAttribute('aria-label', etiqueta);
+          if (actual) b.setAttribute('aria-current', 'page');
+          b.disabled = actual;
+          b.className =
+            'inline-flex h-11 min-w-11 items-center justify-center rounded border px-3 text-sm font-semibold ' +
+            (actual
+              ? 'border-py-azul bg-py-azul text-white'
+              : 'border-gray-300 bg-white text-gray-700 hover:border-py-azul hover:text-py-azul');
+          b.addEventListener('click', () => {
+            pagina = destino;
+            render();
+            document.querySelector('[data-lista]')?.scrollIntoView({ block: 'start' });
+          });
+          li.append(b);
+          return li;
+        };
+
+        paginadoLista.append(boton('‹', pagina - 1, false, 'Página anterior'));
+        for (let p = 1; p <= totalPaginas; p++) {
+          paginadoLista.append(boton(String(p), p, p === pagina, `Página ${p}`));
+        }
+        paginadoLista.append(boton('›', pagina + 1, false, 'Página siguiente'));
+      }
+    }
+  }
+
+  form?.classList.replace('hidden', 'block');
+
+  input?.addEventListener('input', () => {
+    termino = normalizar(input.value.trim());
+    pagina = 1;
+    render();
+  });
+
+  // Evita recargar la página al enviar (Enter) en un formulario de búsqueda.
+  form?.addEventListener('submit', (e) => e.preventDefault());
+
+  render();
+</script>

@@ -1,0 +1,99 @@
+---
+// Buscador global: informes (texto completo), prensa, glosario, preguntas y páginas
+// institucionales. El índice lo genera Pagefind en el build (scripts/indexar-busqueda.mjs).
+import LayoutBase from '../layouts/LayoutBase.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import { conBase } from '../lib/rutas';
+
+const rutaPagefind = conBase('/pagefind/');
+---
+
+<LayoutBase titulo="Buscar" descripcion="Buscá en los informes técnicos, la prensa, el glosario y los documentos del IPPSE." noindex>
+  <EncabezadoPagina titulo="Buscar" bajada="En el texto completo de los informes, la prensa, el glosario y los documentos institucionales." />
+
+  <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 md:py-12 lg:px-8">
+    <p id="buscar-etiqueta" class="font-serif mb-2 font-semibold text-gray-900">Buscar en el sitio</p>
+    <div id="buscador" data-pagefind={rutaPagefind}></div>
+    <p class="hidden rounded border-l-4 border-py-rojo bg-white p-4 text-sm text-gray-700" data-sin-indice>
+      El buscador se genera al publicar el sitio y no está disponible en el modo de desarrollo
+      (<code>npm run dev</code>). Para probarlo: <code>npm run build</code> y <code>npm run preview</code>.
+    </p>
+  </div>
+
+  <style is:global>
+    /* Pagefind UI con la identidad del sitio */
+    #buscador {
+      --pagefind-ui-scale: 1;
+      --pagefind-ui-primary: var(--color-py-azul);
+      --pagefind-ui-text: var(--color-gray-900);
+      --pagefind-ui-background: #fff;
+      --pagefind-ui-border: var(--color-gray-300);
+      --pagefind-ui-tag: var(--color-py-azul-claro);
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 0.25rem;
+      --pagefind-ui-font: inherit;
+    }
+    #buscador .pagefind-ui__result-link { color: var(--color-py-azul); font-family: var(--font-serif); }
+    #buscador .pagefind-ui__result-title { font-size: 1.125rem; }
+    #buscador mark { background: var(--color-py-azul-claro); color: inherit; }
+  </style>
+
+  <script>
+    const contenedor = document.getElementById('buscador')!;
+    const base = contenedor.dataset.pagefind!;
+
+    const cargarEstilos = () => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `${base}pagefind-ui.css`;
+      document.head.append(link);
+    };
+
+    // pagefind-ui.js es un script clásico (define window.PagefindUI), no un módulo.
+    const cargarScript = () =>
+      new Promise<void>((resolver, rechazar) => {
+        const script = document.createElement('script');
+        script.src = `${base}pagefind-ui.js`;
+        script.onload = () => resolver();
+        script.onerror = () => rechazar(new Error('Sin índice de búsqueda'));
+        document.head.append(script);
+      });
+
+    try {
+      await cargarScript();
+      const { PagefindUI } = window as unknown as { PagefindUI: new (opciones: Record<string, unknown>) => unknown };
+      cargarEstilos();
+      const termino = new URLSearchParams(location.search).get('q') ?? '';
+      new PagefindUI({
+        element: '#buscador',
+        bundlePath: base,
+        showSubResults: true,
+        showImages: false,
+        resetStyles: false,
+        autofocus: true,
+        translations: {
+          placeholder: 'Buscar en informes, prensa, glosario…',
+          zero_results: 'No hay resultados para [SEARCH_TERM]. Probá con otra palabra o revisá la ortografía.',
+          many_results: '[COUNT] resultados para [SEARCH_TERM]',
+          one_result: '1 resultado para [SEARCH_TERM]',
+          filters_label: 'Filtrar por sección',
+          load_more: 'Ver más resultados',
+          clear_search: 'Borrar',
+          search_label: 'Buscar en el sitio',
+        },
+      });
+      // El campo de Pagefind toma la etiqueta visible de arriba.
+      contenedor.querySelector('input')?.setAttribute('aria-labelledby', 'buscar-etiqueta');
+      // Búsqueda inicial desde la URL (/buscar/?q=hvdc), útil para compartir o enlazar.
+      if (termino) {
+        const campo = contenedor.querySelector<HTMLInputElement>('input');
+        if (campo) {
+          campo.value = termino;
+          campo.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }
+    } catch {
+      document.querySelector('[data-sin-indice]')?.classList.remove('hidden');
+    }
+  </script>
+</LayoutBase>

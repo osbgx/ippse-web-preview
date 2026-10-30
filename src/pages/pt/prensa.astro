@@ -1,0 +1,161 @@
+---
+// "Imprensa e Novidades" en portugués: espejo de src/pages/prensa.astro.
+// Contenido en español; acá el índice traducido, en listas simples sin paginado.
+import { conBase } from '../../lib/rutas';
+import LayoutBase from '../../layouts/LayoutBase.astro';
+import EncabezadoPagina from '../../components/EncabezadoPagina.astro';
+import { diccionarios } from '../../data/i18n';
+import { getComunicados, getApariciones, getEventos } from '../../data/prensa';
+
+const d = diccionarios.pt;
+const t = d.contenido.prensa;
+const inicio = { etiqueta: d.ui.inicio, href: conBase('/pt/') };
+
+const comunicados = await getComunicados();
+const apariciones = await getApariciones();
+const { proximos, pasados } = await getEventos();
+
+const secciones = [
+  { id: 'comunicados', titulo: t.secciones.comunicados },
+  { id: 'medios', titulo: t.secciones.medios },
+  { id: 'eventos', titulo: t.secciones.eventos },
+];
+
+const fechaLocal = (iso: string) =>
+  new Date(iso.length === 7 ? `${iso}-01` : iso).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+---
+
+<LayoutBase lang="pt" titulo={t.titulo} descripcion={t.descripcion}>
+  <EncabezadoPagina titulo={t.titulo} bajada={t.descripcion} inicioEtiqueta={inicio.etiqueta} inicioHref={inicio.href}>
+    <nav aria-label="Seções" class="mt-6 -mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+      {secciones.map(({ id, titulo }) => (
+        <a href={`#${id}`} class="font-serif inline-flex min-h-11 shrink-0 snap-start items-center whitespace-nowrap rounded-full border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 no-underline hover:border-py-azul hover:text-py-azul">
+          {titulo}
+        </a>
+      ))}
+    </nav>
+  </EncabezadoPagina>
+
+  <div class="mx-auto grid grid-cols-1 max-w-7xl gap-12 px-4 py-10 sm:px-6 md:py-14 lg:grid-cols-[minmax(0,1fr)_20rem] lg:px-8">
+    <div class="space-y-14">
+      <p class="rounded border-l-4 border-py-rojo bg-gray-50 p-4 text-sm text-gray-700">{t.notaEspanol}</p>
+
+      <!-- Comunicados -->
+      <section id="comunicados" aria-labelledby="comunicados-titulo">
+        <h2 id="comunicados-titulo" class="border-b-2 border-py-azul pb-2 text-2xl font-bold sm:text-3xl">{t.secciones.comunicados}</h2>
+        <ul class="mt-6 space-y-4">
+          {comunicados.map(({ id, fecha, titulo, extracto }) => (
+            <li class="rounded border border-gray-200 border-l-4 border-l-py-rojo bg-white p-5 shadow-sm sm:p-6">
+              <time datetime={fecha} class="font-serif text-sm font-semibold text-gray-500">{fechaLocal(fecha)}</time>
+              <h3 class="mt-2 text-lg font-semibold leading-snug sm:text-xl">
+                <a href={conBase(`/prensa/${id}/`)} class="text-gray-900 no-underline hover:text-py-azul">{titulo}</a>
+              </h3>
+              <p class="mt-2 text-sm leading-relaxed text-gray-600 sm:text-base">{extracto}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <!-- Aparições na mídia -->
+      <section id="medios" aria-labelledby="medios-titulo">
+        <h2 id="medios-titulo" class="border-b-2 border-py-azul pb-2 text-2xl font-bold sm:text-3xl">{t.secciones.medios}</h2>
+        <ul class="mt-4 divide-y divide-gray-200">
+          {apariciones.map(({ medio, titulo, fecha, url }) => (
+            <li class="py-4">
+              <p class="font-serif flex flex-wrap items-baseline gap-x-4 text-sm font-semibold">
+                <span class="text-py-azul">{medio}</span>
+                <time datetime={fecha} class="text-gray-500">{fechaLocal(fecha)}</time>
+              </p>
+              <p class="mt-1 font-serif text-lg font-semibold leading-snug text-gray-900">
+                {url ? (
+                  <a href={url} target="_blank" rel="noopener" class="text-gray-900 no-underline hover:text-py-azul">
+                    {titulo}
+                    <span class="sr-only"> {d.footer.srNuevaPestana}</span>
+                  </a>
+                ) : (
+                  <span class="text-gray-900">{titulo}</span>
+                )}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <!-- Eventos -->
+      <section id="eventos" aria-labelledby="eventos-titulo">
+        <h2 id="eventos-titulo" class="border-b-2 border-py-azul pb-2 text-2xl font-bold sm:text-3xl">{t.secciones.eventos}</h2>
+
+        {proximos.length > 0 && (
+          <p class="mt-6 font-serif text-sm font-semibold text-py-rojo">{t.eventos.proximos}</p>
+        )}
+        <ul class="mt-3 space-y-3">
+          {proximos.map(({ id, fecha, tipoEvento, titulo, lugar }) => {
+            const evt = new Date(fecha);
+            return (
+              <li class="flex flex-col gap-3 rounded border border-gray-200 bg-white p-4 sm:flex-row sm:items-stretch sm:gap-5">
+                <time datetime={fecha} class="flex w-16 shrink-0 flex-col items-center justify-center rounded bg-py-azul py-2 text-white">
+                  <span class="font-serif text-2xl font-bold leading-none">{evt.getUTCDate()}</span>
+                  <span class="font-serif mt-1 text-sm font-semibold">
+                    {evt.toLocaleDateString('pt-BR', { month: 'short', timeZone: 'UTC' })} {evt.getUTCFullYear()}
+                  </span>
+                </time>
+                <div>
+                  <p class="font-serif text-sm font-semibold text-py-rojo">{tipoEvento}</p>
+                  <h3 class="mt-1 text-base font-semibold leading-snug">
+                    <a href={conBase(`/prensa/${id}/`)} class="text-gray-900 no-underline hover:text-py-azul">{titulo}</a>
+                  </h3>
+                  <p class="mt-1 text-sm text-gray-600">{lugar}</p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+
+        {pasados.length > 0 && (
+          <p class="mt-8 font-serif text-sm font-semibold text-gray-500">{t.eventos.pasados}</p>
+        )}
+        <ul class="mt-3 space-y-3">
+          {pasados.map(({ id, fecha, tipoEvento, titulo, lugar }) => {
+            const evt = new Date(fecha);
+            return (
+              <li class="flex flex-col gap-3 rounded border border-gray-200 bg-gray-50 p-4 sm:flex-row sm:items-stretch sm:gap-5">
+                <time datetime={fecha} class="flex w-16 shrink-0 flex-col items-center justify-center rounded bg-gray-300 py-2 text-gray-700">
+                  <span class="font-serif text-2xl font-bold leading-none">{evt.getUTCDate()}</span>
+                  <span class="font-serif mt-1 text-sm font-semibold">
+                    {evt.toLocaleDateString('pt-BR', { month: 'short', timeZone: 'UTC' })} {evt.getUTCFullYear()}
+                  </span>
+                </time>
+                <div>
+                  <p class="font-serif text-sm font-semibold text-gray-500">{tipoEvento}</p>
+                  <h3 class="mt-1 text-base font-semibold leading-snug">
+                    <a href={conBase(`/prensa/${id}/`)} class="text-gray-700 no-underline hover:text-py-azul">{titulo}</a>
+                  </h3>
+                  <p class="mt-1 text-sm text-gray-500">{lugar}</p>
+                </div>
+              </li>
+            );
+          })}
+          {proximos.length === 0 && pasados.length === 0 && (
+            <li class="text-gray-600">{t.eventos.vacio}</li>
+          )}
+        </ul>
+      </section>
+    </div>
+
+    <!-- Contato da imprensa -->
+    <aside class="lg:sticky lg:top-6 lg:self-start" aria-labelledby="prensa-contacto-titulo">
+      <div class="rounded border-l-8 border-py-rojo bg-py-azul p-6 text-white">
+        <h2 id="prensa-contacto-titulo" class="text-xl font-bold text-white">Você é jornalista ou trabalha em veículo de imprensa?</h2>
+        <p class="mt-2 text-gray-100">Fale com a nossa equipe de imprensa.</p>
+        <a href={conBase('/pt/contacto/#formulario')} class="font-serif mt-5 flex min-h-11 items-center justify-center rounded bg-white px-5 font-semibold text-py-azul no-underline hover:bg-py-azul-claro">
+          Contatos
+        </a>
+      </div>
+    </aside>
+  </div>
+</LayoutBase>

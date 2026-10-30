@@ -1,0 +1,108 @@
+# Configuración Apache (cPanel) para el sitio estático del IPPSE — https://ippse.org.py
+# Autor: osbgx.dev — https://osbgx.dev
+
+ErrorDocument 404 /404.html
+
+# Registro interno de la subida por FTP (lo crea el workflow de publicación): no se sirve.
+<Files ".ftp-deploy-sync-state.json">
+  Require all denied
+</Files>
+
+# Código PHP compartido (proteccion.inc.php): se incluye desde los formularios, nunca se sirve.
+<FilesMatch "\.inc\.php$">
+  Require all denied
+</FilesMatch>
+
+# Sin listado de carpetas
+Options -Indexes
+AddDefaultCharset UTF-8
+AddCharset UTF-8 .txt .xml .webmanifest .json
+
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+  AddType text/plain .txt
+  AddType text/calendar .ics
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Dominio canónico: HTTPS y sin www (una sola versión del sitio para los buscadores)
+  RewriteCond %{HTTPS} off [OR]
+  RewriteCond %{HTTP_HOST} ^www\. [NC]
+  RewriteRule ^(.*)$ https://ippse.org.py/$1 [R=301,L]
+
+  # URLs del sitio anterior -> nuevas rutas (301 permanente, conserva SEO y enlaces compartidos)
+  RewriteRule ^informes-publicaciones/?$ /publicaciones/ [R=301,L]
+
+  # Variantes de nombre del archivo para LLMs -> /llms.txt (estándar llmstxt.org)
+  RewriteRule ^(LLM|LLMS|llm|Llms)\.txt$ /llms.txt [R=301,L]
+
+  # /index.html -> / (evita contenido duplicado)
+  RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.html[\s?] [NC]
+  RewriteRule ^(.*/)?index\.html$ /$1 [R=301,L]
+
+  # Rutas sin barra final -> con barra (evita contenido duplicado)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME}/index.html -f
+  RewriteRule ^(.+[^/])$ /$1/ [R=301,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # HSTS: el navegador recuerda usar siempre HTTPS
+  Header always set Strict-Transport-Security "max-age=31536000" env=HTTPS
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+
+  # Content-Security-Policy: solo se cargan recursos de estos orígenes.
+  #   cdn.jsdelivr.net          -> Mermaid, KaTeX, marked, DOMPurify (visor y diagramas)
+  #   raw.githubusercontent.com -> imágenes y textos del repositorio de documentos
+  #   api.github.com            -> lectura del repositorio de documentos (visor)
+  #   challenges.cloudflare.com -> Turnstile (anti-spam, opcional)
+  #   __UMAMI_ORIGEN__          -> estadísticas (lo completa scripts/ajustar-htaccess.mjs en el build)
+  # 'unsafe-inline' en scripts: Astro inserta scripts chicos en línea. 'wasm-unsafe-eval': el buscador (Pagefind).
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com __UMAMI_ORIGEN__; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https://raw.githubusercontent.com; font-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://raw.githubusercontent.com https://api.github.com https://cdn.jsdelivr.net __UMAMI_ORIGEN__; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+
+  # Caché: los archivos de /_astro/ llevan hash en el nombre (cambian de nombre si cambian)
+  <If "%{REQUEST_URI} =~ m#^/_astro/#">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </If>
+  # HTML y feeds: siempre se revalidan, así cada publicación se ve al instante
+  <FilesMatch "\.(html|xml|ics|txt)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+
+  # Los scripts de formularios y los archivos técnicos (robots, sitemap, llms) no se indexan como páginas
+  <FilesMatch "\.php$">
+    Header set X-Robots-Tag "noindex, nofollow"
+  </FilesMatch>
+  <FilesMatch "\.(txt|xml)$">
+    Header set X-Robots-Tag "noindex"
+  </FilesMatch>
+</IfModule>
+
+# Compresión gzip (mejora la velocidad de carga, factor de posicionamiento)
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/xml application/javascript application/json application/manifest+json image/svg+xml
+</IfModule>
+
+# Caché larga para CSS, JS y fuentes (llevan hash en el nombre); imágenes por un mes
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 month"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/jpeg "access plus 1 month"
+  ExpiresByType image/svg+xml "access plus 1 month"
+  ExpiresByType image/x-icon "access plus 1 month"
+  ExpiresByType application/pdf "access plus 1 week"
+  ExpiresByType application/manifest+json "access plus 1 week"
+  ExpiresByType text/plain "access plus 1 day"
+  ExpiresByType application/xml "access plus 1 day"
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>

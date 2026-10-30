@@ -1,0 +1,81 @@
+---
+import PaginaPolitica from '../components/PaginaPolitica.astro';
+import { conBase } from '../lib/rutas';
+import { contacto } from '../data/contacto';
+import { nombreInstitucion } from '../data/seo';
+
+// Umami (estadísticas): el texto cambia solo cuando está activo.
+const conEstadisticas = Boolean(
+  (import.meta.env.PUBLIC_UMAMI_SRC ?? '').trim() && (import.meta.env.PUBLIC_UMAMI_ID ?? '').trim(),
+);
+---
+
+<PaginaPolitica
+  titulo="Política de privacidad"
+  descripcion="Qué datos personales recoge el sitio del IPPSE, para qué los usa y cómo ejercer tus derechos."
+  actualizado="2026-10-24"
+>
+  <h2>Responsable</h2>
+  <p>
+    El responsable del tratamiento de los datos es el {nombreInstitucion} (IPPSE), con sede en {contacto.ciudad}.
+    Para cualquier consulta sobre tus datos, escribinos a <a href={`mailto:${contacto.email}`}>{contacto.email}</a>.
+  </p>
+
+  <h2>Qué datos recogemos</h2>
+  <p>El sitio solo recoge datos personales cuando completás el <a href={conBase('/contacto/#formulario')}>formulario de contacto</a> o te suscribís al boletín. En el formulario de contacto:</p>
+  <ul>
+    <li>Nombre y correo electrónico.</li>
+    <li>Especialidad o área profesional, en las solicitudes de membresía.</li>
+    <li>El mensaje que nos envíes.</li>
+  </ul>
+  <p>No pedimos datos sensibles. Te pedimos que no los incluyas en el mensaje.</p>
+
+  <h2>Para qué los usamos</h2>
+  <ul>
+    <li>Responder tu consulta.</li>
+    <li>Evaluar tu solicitud de membresía, conforme a los Estatutos y el Reglamento Interno del IPPSE.</li>
+  </ul>
+  <p>No usamos tus datos con fines comerciales, no los vendemos ni los cedemos a terceros, y no te sumamos a listas de difusión sin tu consentimiento.</p>
+
+  <h2>Cómo los tratamos</h2>
+  <p>
+    El formulario se envía por correo electrónico al buzón institucional del IPPSE. El sitio no guarda los mensajes en
+    ninguna base de datos. Los correos se conservan mientras sean necesarios para atender la consulta o gestionar la
+    membresía.
+  </p>
+
+  <h2>Boletín por email</h2>
+  <p>
+    Si te suscribís al boletín, guardamos solo tu correo electrónico para enviarte los nuevos informes y comunicados.
+    La lista se gestiona con Brevo, un servicio de envío de emails que trata los datos por cuenta del IPPSE. La
+    suscripción requiere que la confirmes desde el email que te enviamos, y cada envío incluye un enlace para darte
+    de baja en cualquier momento.
+  </p>
+
+  <h2>Cookies y seguimiento</h2>
+  {conEstadisticas ? (
+    <p>
+      El sitio no usa cookies, ni publicidad, ni rastreadores de terceros. Para saber qué páginas e informes se leen,
+      usamos Umami, una herramienta de estadísticas que no usa cookies, no guarda tu dirección IP ni datos que te
+      identifiquen, y respeta la opción “No rastrear” de tu navegador.
+    </p>
+  ) : (
+    <p>El sitio no usa cookies, ni herramientas de analítica, ni publicidad, ni rastreadores de terceros.</p>
+  )}
+  <p>
+    El visor de
+    documentos descarga algunas librerías y los informes desde servicios externos (jsDelivr y GitHub), que pueden
+    registrar datos técnicos de la conexión, como la dirección IP, según sus propias políticas.
+  </p>
+
+  <h2>Tus derechos</h2>
+  <p>
+    Podés pedir en cualquier momento acceder a tus datos, corregirlos o eliminarlos, escribiendo a{" "}
+    <a href={`mailto:${contacto.email}`}>{contacto.email}</a>. Estos derechos están amparados por la Constitución
+    Nacional del Paraguay, que reconoce el derecho a la intimidad (artículo 33) y la garantía de hábeas data
+    (artículo 135).
+  </p>
+
+  <h2>Cambios en esta política</h2>
+  <p>Si modificamos esta política, publicaremos la nueva versión en esta página con su fecha de actualización.</p>
+</PaginaPolitica>

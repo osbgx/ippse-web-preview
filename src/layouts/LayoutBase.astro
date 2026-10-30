@@ -1,0 +1,230 @@
+---
+import { conBase } from '../lib/rutas';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import CintaAlertas from '../components/CintaAlertas.astro';
+import Footer from '../components/Footer.astro';
+import Estadisticas from '../components/Estadisticas.astro';
+import { feeds } from '../lib/rss';
+import {
+  autorSitio, esCopiaDeRevision, imagenSocial, nodosBase, nombreInstitucion, nombreSitio, palabrasClave,
+} from '../data/seo';
+import { alternatasDe, type Idioma } from '../data/i18n';
+
+interface Miga {
+  nombre: string;
+  /** Ruta interna con base (p. ej. conBase('/prensa/')). */
+  ruta: string;
+}
+
+interface Props {
+  titulo: string;
+  descripcion?: string;
+  /** "article" en notas de prensa; el resto de las páginas son "website". */
+  tipo?: 'website' | 'article';
+  /** Fechas ISO de publicación y modificación (solo artículos). */
+  publicado?: string;
+  modificado?: string;
+  /** Página que no debe aparecer en buscadores (404, visor). */
+  noindex?: boolean;
+  /** Migas de pan intermedias entre Inicio y la página actual (para BreadcrumbList). */
+  migas?: Miga[];
+  /** Nodos schema.org adicionales que se suman al grafo de la página. */
+  schema?: Record<string, unknown>[];
+  /** Palabras clave propias de la página (se suman a las generales). */
+  claves?: string[];
+  /** Idioma de la página: 'es' por defecto; 'en' y 'pt' son las páginas espejo. */
+  lang?: Idioma;
+  /** true solo en la home (afecta el <title>, la miga y el schema). */
+  esInicio?: boolean;
+  /** Imagen para compartir propia de la página (PNG 1200×630, ruta con base). Por defecto, la general. */
+  imagenOg?: string;
+}
+
+const {
+  titulo,
+  descripcion = 'Instituto de Profesionales Paraguayos del Sector Eléctrico (IPPSE).',
+  tipo = 'website',
+  publicado,
+  modificado,
+  noindex = false,
+  migas = [],
+  schema = [],
+  claves = [],
+  lang = 'es',
+  esInicio: esInicioProp,
+  imagenOg,
+} = Astro.props;
+
+const etiquetaInicio = lang === 'es' ? 'Inicio' : lang === 'en' ? 'Home' : 'Início';
+const esInicio = esInicioProp ?? titulo === 'Inicio';
+const tituloCompleto = esInicio ? `${nombreSitio} — ${nombreInstitucion}` : `${titulo} | ${nombreSitio}`;
+// ASTRO.site ya incluye el base (p. ej. https://osbgx.github.io/ippse-web), y Astro.url.pathname
+// trae el path con base: juntos dan la URL canónica completa en ambos destinos.
+const urlCanonica = new URL(Astro.url.pathname, Astro.site).href;
+const urlImagen = new URL(imagenOg ?? conBase(imagenSocial.ruta), Astro.site).href;
+const tipoImagen = imagenOg ? 'image/png' : 'image/jpeg';
+const altImagen = imagenOg ? `${titulo} — IPPSE` : imagenSocial.alt;
+
+const indexar = !noindex && !esCopiaDeRevision;
+const robots = indexar
+  ? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+  : 'noindex, follow';
+
+// Datos estructurados (schema.org) en un único grafo JSON-LD
+const { raiz, organizacion, autor, sitio } = nodosBase(Astro.site!);
+const idPagina = `${urlCanonica}#pagina`;
+const rutaInicio = conBase(lang === 'es' ? '/' : `/${lang}/`);
+const listaMigas = [
+  { nombre: etiquetaInicio, ruta: rutaInicio },
+  ...migas,
+  ...(esInicio ? [] : [{ nombre: titulo, ruta: Astro.url.pathname }]),
+];
+const grafo = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    organizacion,
+    sitio,
+    autor,
+    {
+      '@type': 'WebPage',
+      '@id': idPagina,
+      url: urlCanonica,
+      name: tituloCompleto,
+      description: descripcion,
+      inLanguage: lang === 'es' ? 'es-PY' : lang === 'en' ? 'en' : 'pt-BR',
+      isPartOf: { '@id': `${raiz}#sitio` },
+      about: { '@id': `${raiz}#organizacion` },
+      publisher: { '@id': `${raiz}#organizacion` },
+      author: { '@id': autor['@id'] },
+      creator: { '@id': autor['@id'] },
+      primaryImageOfPage: { '@type': 'ImageObject', url: urlImagen, width: imagenSocial.ancho, height: imagenSocial.alto },
+      breadcrumb: { '@id': `${urlCanonica}#migas` },
+      ...(publicado && { datePublished: publicado }),
+      ...((modificado ?? publicado) && { dateModified: modificado ?? publicado }),
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${urlCanonica}#migas`,
+      itemListElement: listaMigas.map((m, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: m.nombre,
+        item: new URL(m.ruta, Astro.site).href,
+      })),
+    },
+    ...schema,
+  ],
+};
+---
+
+<!doctype html>
+<html lang={lang === 'es' ? 'es-PY' : lang === 'en' ? 'en' : 'pt-BR'} prefix="og: https://ogp.me/ns#">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={descripcion} />
+    <meta name="keywords" content={[...claves, ...palabrasClave].join(', ')} />
+    <meta name="robots" content={robots} />
+    <meta name="googlebot" content={robots} />
+    <link rel="canonical" href={urlCanonica} />
+    <!-- hreflang: la página en sí + sus espejos cuando existen (se derivan de la ruta). -->
+    {(alternatasDe(Astro.url.pathname) ? (
+      (() => {
+        const alt = alternatasDe(Astro.url.pathname)!;
+        const nodos = [
+          ['es-PY', alt.es],
+          ['en', alt.en],
+          ['pt-BR', alt.pt],
+          ['x-default', alt.xDefault],
+        ] as const;
+        return nodos.map(([hl, href]) => <link rel="alternate" hreflang={hl} href={href} />);
+      })()
+    ) : (
+      <>
+        <link rel="alternate" hreflang="es-PY" href={urlCanonica} />
+        <link rel="alternate" hreflang="x-default" href={urlCanonica} />
+      </>
+    ))}
+
+    <!-- Autoría del sitio -->
+    <meta name="author" content={autorSitio.nombre} />
+    <meta name="creator" content={autorSitio.nombre} />
+    <meta name="designer" content={autorSitio.nombre} />
+    <meta name="publisher" content={nombreInstitucion} />
+    <meta name="copyright" content={nombreInstitucion} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="author" href={conBase('/humans.txt')} type="text/plain" />
+
+    <!-- Iconos y aplicación -->
+    <link rel="icon" type="image/svg+xml" href={conBase('/favicon.svg')} />
+    <link rel="icon" type="image/x-icon" href={conBase('/favicon.ico')} sizes="32x32" />
+    <link rel="apple-touch-icon" href={conBase('/apple-touch-icon.png')} />
+    <link rel="manifest" href={conBase('/site.webmanifest')} />
+    <meta name="theme-color" content="#0038a8" />
+    <meta name="application-name" content={nombreSitio} />
+    <meta name="apple-mobile-web-app-title" content={nombreSitio} />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Recursos para buscadores y modelos de lenguaje -->
+    <link rel="sitemap" type="application/xml" href={conBase('/sitemap.xml')} />
+    <link rel="alternate" type="text/plain" title="llms.txt" href={conBase('/llms.txt')} />
+    {Object.values(feeds).map((f) => (
+      <link rel="alternate" type="application/rss+xml" title={f.titulo} href={conBase(f.ruta)} />
+    ))}
+
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
+    <meta property="og:site_name" content={nombreSitio} />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:type" content={tipo} />
+    <meta property="og:url" content={urlCanonica} />
+    <meta property="og:locale" content={lang === 'es' ? 'es_PY' : lang === 'en' ? 'en_US' : 'pt_BR'} />
+    <meta property="og:image" content={urlImagen} />
+    <meta property="og:image:secure_url" content={urlImagen} />
+    <meta property="og:image:type" content={tipoImagen} />
+    <meta property="og:image:width" content={String(imagenSocial.ancho)} />
+    <meta property="og:image:height" content={String(imagenSocial.alto)} />
+    <meta property="og:image:alt" content={altImagen} />
+    {tipo === 'article' && (
+      <>
+        <meta property="article:author" content={autorSitio.url} />
+        <meta property="article:publisher" content={raiz} />
+        {publicado && <meta property="article:published_time" content={publicado} />}
+        {(modificado ?? publicado) && <meta property="article:modified_time" content={modificado ?? publicado} />}
+        <meta property="article:section" content="Prensa y Novedades" />
+      </>
+    )}
+
+    <!-- X (Twitter) -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={tituloCompleto} />
+    <meta name="twitter:description" content={descripcion} />
+    <meta name="twitter:image" content={urlImagen} />
+    <meta name="twitter:image:alt" content={altImagen} />
+
+    <!-- Datos estructurados (schema.org) -->
+    <script type="application/ld+json" set:html={JSON.stringify(grafo)} />
+    <Estadisticas />
+    <slot name="head" />
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <a
+      href="#contenido"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-py-azul focus:px-4 focus:py-2 focus:text-white"
+    >
+      {lang === 'es' ? 'Saltar al contenido' : lang === 'en' ? 'Skip to main content' : 'Pular para o conteúdo principal'}
+    </a>
+    <Header lang={lang} />
+    <CintaAlertas lang={lang} />
+    <!-- data-pagefind-body: solo el contenido principal entra al buscador (no menú ni pie); las páginas noindex quedan fuera -->
+    <main id="contenido" tabindex="-1" class="flex-1 focus:outline-none" data-pagefind-body={noindex ? undefined : ""}>
+      <!-- Sección para filtrar resultados del buscador (la primera miga, o la propia página) -->
+      <span hidden data-pagefind-ignore data-pagefind-filter="sección">{migas[0]?.nombre ?? titulo}</span>
+      <span hidden data-pagefind-ignore data-pagefind-meta="title">{titulo}</span>
+      <slot />
+    </main>
+    <Footer lang={lang} />
+  </body>
+</html>

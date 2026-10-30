@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 150" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="t">
+  <title id="t">IPPSE — Instituto de Profesionales Paraguayos del Sector Eléctrico</title>
+  <!-- Texto principal IPPSE -->
+  <text x="200" y="90" font-family="Times New Roman, Georgia, serif" font-size="85" font-weight="bold" fill="#000000" text-anchor="middle" letter-spacing="1">
+    IPPSE
+  </text>
+
+  <!-- Línea roja (bandera paraguaya) -->
+  <rect x="20" y="105" width="360" height="10" fill="#D52B1E" />
+
+  <!-- Franja blanca central (bandera paraguaya) -->
+  <rect x="20" y="115" width="360" height="10" fill="#FFFFFF" />
+
+  <!-- Línea azul (bandera paraguaya) -->
+  <rect x="20" y="125" width="360" height="10" fill="#0038A8" />
+</svg>

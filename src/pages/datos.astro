@@ -1,0 +1,64 @@
+---
+// Datos: las cifras clave de los informes, en gráficos simples y citables.
+// Cada gráfico sale de una tabla Markdown del repositorio de documentos (contenido/datos/).
+import LayoutBase from '../layouts/LayoutBase.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import GraficoBarras from '../components/GraficoBarras.astro';
+import { conBase } from '../lib/rutas';
+import { getDatos } from '../data/datos';
+
+const conjuntos = await getDatos();
+const urlPagina = new URL(conBase('/datos/'), Astro.site).href;
+
+// Dataset (schema.org): cada gráfico como conjunto de datos con su fuente.
+const schema = conjuntos.map((d) => ({
+  '@type': 'Dataset',
+  '@id': `${urlPagina}#${d.id}`,
+  name: d.titulo,
+  description: d.descripcion,
+  url: `${urlPagina}#${d.id}`,
+  inLanguage: 'es-PY',
+  creator: { '@id': `${new URL(import.meta.env.BASE_URL, Astro.site).href}#organizacion` },
+  ...(d.informe && { isBasedOn: new URL(d.informe.url, Astro.site).href }),
+  variableMeasured: d.unidad,
+}));
+---
+
+<LayoutBase
+  titulo="Datos"
+  descripcion="Las cifras clave de los informes del IPPSE en gráficos: plazos, costos y potencia de las nuevas fuentes de generación eléctrica."
+  schema={schema}
+  claves={['datos sector eléctrico Paraguay', 'LCOE Paraguay', 'plazos generación eléctrica']}
+>
+  <EncabezadoPagina
+    titulo="Datos"
+    bajada="Las cifras clave de nuestros informes, en gráficos. Podés reproducirlos citando la fuente."
+  />
+
+  <div class="mx-auto max-w-5xl px-4 py-10 sm:px-6 md:py-14 lg:px-8">
+    <nav aria-label="Gráficos de esta página" class="mb-10">
+      <ul class="divide-y divide-gray-200 border-y border-gray-200">
+        {conjuntos.map((d) => (
+          <li><a href={`#${d.id}`} class="flex min-h-11 items-center font-serif font-semibold text-gray-900 no-underline hover:text-py-azul">{d.titulo}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="space-y-16">
+      {conjuntos.map((d) => (
+        <section id={d.id} aria-labelledby={`${d.id}-titulo`} class="scroll-mt-6">
+          <h2 id={`${d.id}-titulo`} class="text-2xl font-bold leading-tight">{d.titulo}</h2>
+          <p id={`${d.id}-desc`} class="mt-2 max-w-3xl leading-relaxed text-gray-700">{d.descripcion}</p>
+          <div class="mt-6">
+            <GraficoBarras datos={d} />
+          </div>
+          {d.informe && (
+            <p class="mt-3 border-t border-gray-200 pt-3 text-sm text-gray-600">
+              Fuente: IPPSE, <a href={d.informe.url}>{d.informe.titulo}</a>.
+            </p>
+          )}
+        </section>
+      ))}
+    </div>
+  </div>
+</LayoutBase>

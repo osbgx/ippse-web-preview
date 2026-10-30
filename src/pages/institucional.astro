@@ -1,0 +1,113 @@
+---
+import { conBase } from '../lib/rutas';
+import { Icon } from 'astro-icon/components';
+import { getEntry, render } from 'astro:content';
+import LayoutBase from '../layouts/LayoutBase.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import { statSync } from 'node:fs';
+import { descargasInstitucionales, pdfConstitucion } from '../data/documentos';
+
+const documento = await getEntry('institucional', 'constitucion');
+if (!documento) throw new Error('Falta contenido/institucional/constitucion.md en el repositorio de documentos');
+
+const { Content, headings } = await render(documento);
+// Cada sección del documento (Constitución, Estatutos, Código de Ética...) es un H2.
+const secciones = headings.filter((h) => h.depth === 2);
+
+// Tamaño real de cada PDF, leído de public/ durante el build.
+const tamano = (bytes: number) =>
+  bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1).replace('.', ',')} MB` : `${Math.round(bytes / 1024)} KB`;
+const descargas = descargasInstitucionales.map((d) => ({
+  ...d,
+  tamano: tamano(statSync(`${process.cwd()}/public${d.ruta}`).size),
+}));
+---
+
+<LayoutBase
+  titulo="Institucional"
+  descripcion="Constitución, Acta de constitución, Estatutos, Reglamento Interno y Código de Ética del IPPSE."
+  migas={[{ nombre: 'Nosotros', ruta: conBase('/nosotros/') }]}
+  claves={['estatutos IPPSE', 'código de ética', 'constitución IPPSE']}
+>
+  <EncabezadoPagina
+    titulo="Institucional"
+    migas={[{ etiqueta: 'Nosotros', href: conBase('/nosotros/') }]}
+    bajada="Documentos que establecen la organización, el funcionamiento y los principios del Instituto."
+  />
+
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-12 lg:px-8">
+    <!-- Centro de descargas: PDF oficial de cada documento, con fecha, páginas y tamaño -->
+    <section id="descargas" aria-labelledby="descargas-titulo" class="mb-10 scroll-mt-6">
+      <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-b-2 border-gray-900 pb-2">
+        <h2 id="descargas-titulo" class="text-2xl font-bold">Descargas</h2>
+        <a href={pdfConstitucion.href} target="_blank" rel="noopener" class="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold">
+          <Icon name="lucide:download" class="h-4 w-4" aria-hidden="true" />
+          Todos en un solo PDF ({pdfConstitucion.peso})
+          <span class="sr-only">(abre en una pestaña nueva)</span>
+        </a>
+      </div>
+      <p class="mt-2 text-sm text-gray-600">Versión oficial: copia escaneada de los originales. El texto completo de cada documento está más abajo.</p>
+      <!-- Lista en móvil (una fila apilada por documento); columnas alineadas desde sm -->
+      <ul class="mt-3 border-t border-gray-300">
+        <li class="font-serif hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1.2fr)_4rem_5rem_4rem] gap-4 border-b border-gray-300 py-2 text-sm font-semibold text-gray-500 sm:grid" aria-hidden="true">
+          <span>Documento</span><span>Fecha</span><span>Páginas</span><span>Tamaño</span><span></span>
+        </li>
+        {descargas.map((d) => (
+          <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 border-b border-gray-200 py-3 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1.2fr)_4rem_5rem_4rem] sm:py-2">
+            <a href={`#${d.ancla}`} class="font-serif text-base font-semibold text-gray-900 no-underline hover:text-py-azul">{d.documento}</a>
+            <span class="col-start-1 row-start-2 text-sm text-gray-600 sm:col-start-auto sm:row-start-auto sm:text-gray-700">
+              {d.fecha}<span class="sm:hidden"> · {d.paginas} págs. · {d.tamano}</span>
+            </span>
+            <span class="hidden text-sm text-gray-700 sm:block">{d.paginas}</span>
+            <span class="hidden text-sm whitespace-nowrap text-gray-700 sm:block">{d.tamano}</span>
+            <a href={conBase(d.ruta)} download class="col-start-2 row-span-2 row-start-1 inline-flex min-h-11 items-center gap-1.5 justify-self-end text-sm font-semibold sm:col-start-auto sm:row-span-1 sm:row-start-auto">
+              <Icon name="lucide:download" class="h-4 w-4" aria-hidden="true" />
+              PDF
+              <span class="sr-only">de {d.documento} ({d.tamano})</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- Índice en pantallas chicas (en escritorio está fijo a la izquierda del texto) -->
+    <nav aria-labelledby="docs-titulo" class="lg:hidden">
+      <h2 id="docs-titulo" class="font-serif text-sm font-semibold text-gray-500">Ir a</h2>
+      <ul class="mt-2 divide-y divide-gray-200 border-y border-gray-200">
+        {secciones.map(({ slug, text }) => (
+          <li>
+            <a href={`#${slug}`} class="flex min-h-12 items-center justify-between gap-4 font-serif font-semibold text-gray-900 no-underline">
+              {text}
+              <Icon name="lucide:chevron-down" class="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="mt-8 grid grid-cols-1 gap-10 md:mt-12 lg:grid-cols-[16rem_minmax(0,1fr)]">
+      <aside class="hidden lg:sticky lg:top-6 lg:block lg:self-start" aria-labelledby="indice-titulo">
+        <h2 id="indice-titulo" class="font-serif text-sm font-semibold text-gray-500">Índice</h2>
+        <nav aria-labelledby="indice-titulo">
+          <ol class="mt-3 space-y-1 border-l border-gray-200 text-sm">
+            {secciones.map(({ slug, text }) => (
+              <li>
+                <a href={`#${slug}`} class="-ml-px block border-l-2 border-transparent py-1 pl-4 text-gray-700 no-underline hover:border-py-rojo hover:text-py-azul">
+                  {text}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </aside>
+
+      <article
+        class="prose prose-gray max-w-none break-words rounded border border-gray-200 bg-white px-4 py-6 shadow-sm sm:p-10
+               prose-headings:font-serif prose-h2:mt-12 prose-h2:text-2xl md:prose-h2:mt-16 md:prose-h2:text-3xl prose-h2:scroll-mt-6 prose-h2:border-b-2 prose-h2:border-py-azul prose-h2:pb-2
+               prose-h2:first:mt-0 prose-a:text-py-azul prose-hr:hidden prose-strong:text-gray-900"
+      >
+        <Content />
+      </article>
+    </div>
+  </div>
+</LayoutBase>

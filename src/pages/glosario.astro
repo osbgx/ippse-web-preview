@@ -1,0 +1,89 @@
+---
+import LayoutBase from '../layouts/LayoutBase.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import { conBase } from '../lib/rutas';
+import { getGlosario, inicial } from '../data/glosario';
+
+const glosarioOrdenado = await getGlosario();
+
+const descripcion =
+  'Glosario de términos técnicos del sector eléctrico paraguayo: HVDC, SMR, LCOE, factor de capacidad, ' +
+  'swap energético, potencia y energía, y más.';
+
+const porId = new Map(glosarioOrdenado.map((t) => [t.id, t]));
+const letras = [...new Set(glosarioOrdenado.map(inicial))];
+
+// DefinedTermSet: cada término con su ancla, para rich results y asistentes de IA.
+const urlPagina = new URL(conBase('/glosario/'), Astro.site).href;
+const schema = [
+  {
+    '@type': 'DefinedTermSet',
+    '@id': `${urlPagina}#glosario`,
+    name: 'Glosario técnico del sector eléctrico — IPPSE',
+    description: descripcion,
+    inLanguage: 'es-PY',
+    hasDefinedTerm: glosarioOrdenado.map((t) => ({
+      '@type': 'DefinedTerm',
+      '@id': `${urlPagina}#${t.id}`,
+      name: t.termino,
+      ...(t.sigla && { alternateName: t.sigla }),
+      description: t.texto,
+      url: `${urlPagina}#${t.id}`,
+      inDefinedTermSet: { '@id': `${urlPagina}#glosario` },
+    })),
+  },
+];
+---
+
+<LayoutBase titulo="Glosario técnico" descripcion={descripcion} schema={schema} claves={['glosario energético', 'HVDC', 'SMR', 'LCOE', 'factor de capacidad']}>
+  <EncabezadoPagina
+    titulo="Glosario técnico"
+    bajada="Los términos del sector eléctrico que aparecen en nuestros informes, explicados en lenguaje claro."
+  />
+
+  <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 md:py-12 lg:px-8">
+    <!-- Índice de letras -->
+    <nav aria-label="Índice alfabético" class="mb-8">
+      <ul class="flex flex-wrap gap-2">
+        {letras.map((letra) => (
+          <li>
+            <a href={`#letra-${letra}`} class="font-serif flex h-11 w-11 items-center justify-center rounded border border-gray-200 bg-white font-semibold text-py-azul no-underline hover:border-py-azul">
+              {letra}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <p class="mb-8 text-sm text-gray-600">
+      ¿Buscás respuestas más generales? Mirá las <a href={conBase('/preguntas-frecuentes/')}>preguntas frecuentes</a>.
+    </p>
+
+    {letras.map((letra) => (
+      <section aria-labelledby={`letra-${letra}`} class="mb-10">
+        <h2 id={`letra-${letra}`} data-pagefind-ignore class="scroll-mt-6 border-b-2 border-py-azul pb-1 text-2xl font-bold">{letra}</h2>
+        <dl class="mt-4 space-y-6">
+          {glosarioOrdenado.filter((t) => inicial(t) === letra).map((t) => (
+            <div id={t.id} class="scroll-mt-6 rounded target:bg-py-azul-claro/40 target:p-3">
+              <dt class="font-serif text-lg font-semibold text-gray-900">
+                <a href={`#${t.id}`} class="text-gray-900 no-underline hover:text-py-azul">{t.termino}</a>
+                {t.sigla && <span class="block text-sm font-normal text-gray-500">{t.sigla}</span>}
+              </dt>
+              <dd class="mt-1 leading-relaxed text-gray-700">
+                <div class="[&_p]:m-0 [&_a]:text-py-azul" set:html={t.html} />
+                {t.relacionados.some((id) => porId.has(id)) && (
+                  <p class="mt-2 text-sm text-gray-500">
+                    Ver también:{' '}
+                    {t.relacionados.filter((id) => porId.has(id)).map((id, i) => (
+                      <>{i > 0 && ', '}<a href={`#${id}`}>{porId.get(id)!.termino}</a></>
+                    ))}
+                  </p>
+                )}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    ))}
+  </div>
+</LayoutBase>

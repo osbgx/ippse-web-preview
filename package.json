@@ -1,0 +1,39 @@
+{
+  "name": "ippse-web",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "predev": "node scripts/sincronizar-contenido-local.mjs",
+    "dev": "astro dev",
+    "prebuild": "node scripts/sincronizar-contenido-local.mjs && node -e \"require('fs').writeFileSync('contenido-errores.json','[]')\"",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "postbuild": "node scripts/indexar-busqueda.mjs && node scripts/ajustar-htaccess.mjs",
+    "verificar": "node scripts/verificar-sitio.mjs"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.3",
+    "@fontsource-variable/source-sans-3": "^5.3.1",
+    "@fontsource/source-serif-4": "^5.3.1",
+    "@iconify-json/lucide": "^1.2.147",
+    "@iconify-json/simple-icons": "^1.2.100",
+    "@tailwindcss/typography": "^0.5.20",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.4.1",
+    "astro-icon": "^1.2.0",
+    "katex": "^0.16.22",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "axe-core": "^4.10.3",
+    "html-validate": "^9.5.5",
+    "pagefind": "^1.4.0",
+    "puppeteer-core": "^24.10.0",
+    "satori": "^0.12.2"
+  }
+}

@@ -1,0 +1,54 @@
+---
+// Plantilla de las páginas de políticas (privacidad, accesibilidad, términos).
+import LayoutBase from '../layouts/LayoutBase.astro';
+import EncabezadoPagina from './EncabezadoPagina.astro';
+import { conBase } from '../lib/rutas';
+import { fechaLegible } from '../data/publicaciones';
+
+interface Props {
+  titulo: string;
+  descripcion: string;
+  /** Fecha ISO de la última revisión del texto. */
+  actualizado: string;
+}
+
+const { titulo, descripcion, actualizado } = Astro.props;
+
+const politicas = [
+  { titulo: 'Política de privacidad', ruta: '/privacidad/' },
+  { titulo: 'Declaración de accesibilidad', ruta: '/accesibilidad/' },
+  { titulo: 'Términos de uso', ruta: '/terminos/' },
+];
+---
+
+<LayoutBase titulo={titulo} descripcion={descripcion} modificado={actualizado}>
+  <EncabezadoPagina titulo={titulo} bajada={descripcion} />
+
+  <div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-10 sm:px-6 md:py-14 lg:grid-cols-[minmax(0,1fr)_16rem] lg:px-8">
+    <article class="prose prose-gray max-w-3xl prose-headings:font-serif prose-h2:mt-10 prose-h2:text-2xl prose-a:text-py-azul">
+      <p class="text-sm text-gray-500">Última actualización: <time datetime={actualizado}>{fechaLegible(actualizado)}</time></p>
+      <slot />
+    </article>
+
+    <nav aria-label="Políticas del sitio" class="lg:sticky lg:top-6 lg:self-start">
+      <h2 class="font-serif text-sm font-semibold text-gray-500">Políticas del sitio</h2>
+      <ul class="mt-2 border-l border-gray-200">
+        {politicas.map((p) => {
+          const actual = conBase(p.ruta) === Astro.url.pathname;
+          return (
+            <li>
+              <a
+                href={conBase(p.ruta)}
+                aria-current={actual ? 'page' : undefined}
+                class:list={[
+                  '-ml-px flex min-h-11 items-center border-l-2 pl-4 text-sm no-underline',
+                  actual ? 'border-py-rojo font-semibold text-gray-900' : 'border-transparent text-gray-600 hover:border-gray-400 hover:text-py-azul',
+                ]}
+              >{p.titulo}</a>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  </div>
+</LayoutBase>

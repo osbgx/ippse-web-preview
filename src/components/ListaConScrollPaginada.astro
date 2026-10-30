@@ -1,0 +1,202 @@
+---
+// Lista con scroll interno y paginado reutilizable.
+// La página coloca los <li>/<article> como contenido (slot); este componente aporta
+// la caja con scroll accesible, el contador, el estado vacío y el paginado, más su script.
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  /** Identificador único de la sección (para aislar los selectores del script). */
+  id: string;
+  /** Cuántos elementos por página. */
+  porPagina?: number;
+  /** Tamaño máximo de la caja con scroll (clases de Tailwind). */
+  maxAlto?: string;
+  /** Singular y plural para el contador, p. ej. "comunicado"/"comunicados". */
+  singular: string;
+  plural: string;
+  /** Texto del estado vacío. */
+  vacio?: string;
+  /** Etiqueta accesible de la región con scroll. */
+  etiquetaScroll: string;
+  /** true para mostrar el buscador por título (solo comunicados). */
+  buscador?: boolean;
+  /** Placeholder del buscador. */
+  placeholder?: string;
+  /** Layout interno de la lista. */
+  espaciado?: 'tarjetas' | 'filas' | 'bloques';
+}
+
+const {
+  id,
+  porPagina = 6,
+  maxAlto = 'max-h-[32rem]',
+  singular,
+  plural,
+  vacio,
+  etiquetaScroll,
+  buscador = false,
+  placeholder = 'Buscar por título…',
+  espaciado = 'tarjetas',
+} = Astro.props;
+
+const clasesLista = {
+  tarjetas: 'space-y-4 p-4 sm:p-5',
+  filas: 'divide-y divide-gray-200 px-4 sm:px-5',
+  bloques: 'p-4 sm:p-5',
+}[espaciado];
+---
+
+<div data-lista-scroll data-id={id} data-singular={singular} data-plural={plural} data-por-pagina={porPagina}>
+  {buscador && (
+    <form role="search" class="mt-6 hidden" data-buscador-form novalidate>
+      <label for={`buscar-${id}`} class="sr-only">{placeholder}</label>
+      <div class="relative max-w-xl">
+        <Icon name="lucide:search" class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+        <input
+          type="search"
+          id={`buscar-${id}`}
+          name="q"
+          autocomplete="off"
+          placeholder={placeholder}
+          class="min-h-12 w-full rounded border border-gray-300 bg-white py-3 pl-12 pr-4 text-base text-gray-900 placeholder:text-gray-400 focus:border-py-azul focus:outline-none focus:ring-1 focus:ring-py-azul"
+          data-buscador
+        />
+      </div>
+    </form>
+  )}
+
+  <p class="mt-4 text-sm text-gray-500" aria-live="polite" data-contador></p>
+
+  <div
+    class={`mt-4 overflow-y-auto overscroll-contain rounded border border-gray-200 bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-py-azul ${maxAlto}`}
+    role="region"
+    aria-label={etiquetaScroll}
+    tabindex="0"
+    data-scroll
+  >
+    <div class={clasesLista} data-lista>
+      <slot />
+    </div>
+  </div>
+
+  <p class="mt-4 hidden rounded border border-gray-200 bg-gray-50 p-6 text-center text-gray-600" data-sin-resultados>
+    {vacio ?? `No se encontraron ${plural}.`}
+  </p>
+
+  <nav class="mt-4 hidden justify-center print:hidden" aria-label={`Paginación de ${plural}`} data-paginado>
+    <ul class="flex flex-wrap items-center gap-1" data-paginado-lista></ul>
+  </nav>
+</div>
+
+<script>
+  /** Normaliza texto: minúsculas y sin tildes, para buscar "transmision" en "Transmisión". */
+  const normalizar = (texto: string) =>
+    texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '');
+
+  document.querySelectorAll<HTMLElement>('[data-lista-scroll]').forEach((root) => {
+    const porPagina = Number(root.dataset.porPagina ?? 6);
+    const singular = root.dataset.singular ?? 'elemento';
+    const plural = root.dataset.plural ?? 'elementos';
+
+    const form = root.querySelector<HTMLFormElement>('[data-buscador-form]');
+    const input = root.querySelector<HTMLInputElement>('[data-buscador]');
+    const contador = root.querySelector<HTMLElement>('[data-contador]');
+    const sinResultados = root.querySelector<HTMLElement>('[data-sin-resultados]');
+    const paginado = root.querySelector<HTMLElement>('[data-paginado]');
+    const paginadoLista = root.querySelector<HTMLElement>('[data-paginado-lista]');
+    const lista = root.querySelector<HTMLElement>('[data-lista]');
+    const scroll = root.querySelector<HTMLElement>('[data-scroll]');
+    const children = lista ? ([...lista.children] as HTMLElement[]) : [];
+    // Los elementos con data-fijo (rótulos de grupo) no entran en el paginado ni en el filtro.
+    const fijos = children.filter((el) => el.hasAttribute('data-fijo'));
+    const items = children.filter((el) => !el.hasAttribute('data-fijo'));
+
+    const titulos = items.map((item) => normalizar(item.dataset.titulo ?? item.textContent ?? ''));
+
+    let termino = '';
+    let pagina = 1;
+
+    /** Muestra u oculta los rótulos fijos según haya elementos visibles en su grupo. */
+    const ajustarFijos = (visibles: Set<HTMLElement>) => {
+      fijos.forEach((fijo) => {
+        const grupo = fijo.dataset.fijo;
+        const hay = items.some((el) => visibles.has(el) && el.dataset.grupo === grupo);
+        fijo.hidden = !hay;
+      });
+    };
+
+    function render() {
+      const coincidencias = items.filter((_, i) => titulos[i].includes(termino));
+      const totalPaginas = Math.max(1, Math.ceil(coincidencias.length / porPagina));
+      if (pagina > totalPaginas) pagina = totalPaginas;
+
+      const inicio = (pagina - 1) * porPagina;
+      const visibles = new Set(coincidencias.slice(inicio, inicio + porPagina));
+
+      items.forEach((item) => (item.hidden = !visibles.has(item)));
+      ajustarFijos(visibles);
+
+      if (contador) {
+        const n = coincidencias.length;
+        const nombre = n === 1 ? singular : plural;
+        contador.textContent = termino
+          ? `${n} ${nombre} para “${input?.value.trim()}”`
+          : `${n} ${nombre}`;
+      }
+
+      sinResultados?.classList.toggle('hidden', coincidencias.length > 0);
+      if (scroll) scroll.classList.toggle('hidden', coincidencias.length === 0);
+
+      if (paginado && paginadoLista) {
+        paginadoLista.replaceChildren();
+        paginado.classList.toggle('hidden', totalPaginas <= 1);
+        paginado.classList.toggle('flex', totalPaginas > 1);
+        if (totalPaginas > 1) {
+          const boton = (texto: string, destino: number, actual: boolean, etiqueta?: string) => {
+            const li = document.createElement('li');
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = texto;
+            if (etiqueta) b.setAttribute('aria-label', etiqueta);
+            if (actual) b.setAttribute('aria-current', 'page');
+            b.disabled = actual;
+            b.className =
+              'inline-flex h-11 min-w-11 items-center justify-center rounded border px-3 text-sm font-semibold ' +
+              (actual
+                ? 'border-py-azul bg-py-azul text-white'
+                : 'border-gray-300 bg-white text-gray-700 hover:border-py-azul hover:text-py-azul');
+            b.addEventListener('click', () => {
+              pagina = destino;
+              render();
+              scroll?.scrollTo({ top: 0 });
+              paginado.scrollIntoView({ block: 'nearest' });
+            });
+            li.append(b);
+            return li;
+          };
+
+          paginadoLista.append(boton('‹', pagina - 1, false, 'Página anterior'));
+          for (let p = 1; p <= totalPaginas; p++) {
+            paginadoLista.append(boton(String(p), p, p === pagina, `Página ${p}`));
+          }
+          paginadoLista.append(boton('›', pagina + 1, false, 'Página siguiente'));
+        }
+      }
+    }
+
+    form?.classList.replace('hidden', 'block');
+
+    input?.addEventListener('input', () => {
+      termino = normalizar(input.value.trim());
+      pagina = 1;
+      render();
+    });
+
+    form?.addEventListener('submit', (e) => e.preventDefault());
+
+    render();
+  });
+</script>

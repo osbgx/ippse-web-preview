@@ -1,0 +1,126 @@
+name: Publicar sitio
+
+# Compila el sitio y lo publica. El contenido (informes, prensa, glosario, FAQ,
+# documentos institucionales) vive en el repositorio de documentos y se lee en
+# el build, así que hay que recompilar cuando cambia. Eso pasa SOLO, por tres vías:
+#
+#   1. repository_dispatch "contenido-actualizado": lo envía el webhook del
+#      repositorio de documentos (public/webhook-contenido.php) en cada push.
+#      Es la vía principal: la web se actualiza en 2-3 minutos.
+#   2. schedule (cada hora): red de seguridad por si un aviso se pierde. Solo
+#      compila si el commit de documentos cambió respecto del publicado.
+#   3. push a main de este repositorio (cambios en el código del sitio).
+#
+# Destino: cPanel por FTP (Settings > Secrets and variables > Actions):
+#   secretos FTP_SERVIDOR, FTP_USUARIO, FTP_CLAVE (y opcional FTP_DIRECTORIO,
+#   por defecto public_html/). Variables: PUBLICAR_CPANEL=true,
+#   URL_SITIO, PUBLIC_DOCS_REPO, PUBLIC_IPPSE_*, etc (ver .env.example).
+#
+# Guía completa: docs/publicacion-automatica.md
+
+on:
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [contenido-actualizado]
+  # Revisión horaria desactivada hasta tener el dominio (consulta https://ippse.org.py/contenido-version.txt).
+  # Para reactivarla, descomentar:
+  # schedule:
+  #   - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Una publicación a la vez; si llegan avisos seguidos, se compila solo el último.
+concurrency:
+  group: publicar
+  cancel-in-progress: true
+
+env:
+  # Repositorio de contenido (formato usuario/repositorio).
+  PUBLIC_DOCS_REPO: ${{ vars.PUBLIC_DOCS_REPO || 'osbgx/ippse-documentos' }}
+  PUBLIC_DOCS_RAMA: ${{ vars.PUBLIC_DOCS_RAMA || 'main' }}
+  # Lo provee Actions: sube el límite de la API de GitHub a 1.000 peticiones/hora.
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # Datos de contacto y redes (Variables del repositorio; si faltan, se usan los
+  # valores por defecto de src/data/contacto.ts).
+  PUBLIC_IPPSE_EMAIL: ${{ vars.PUBLIC_IPPSE_EMAIL }}
+  PUBLIC_IPPSE_TELEFONO: ${{ vars.PUBLIC_IPPSE_TELEFONO }}
+  PUBLIC_IPPSE_CIUDAD: ${{ vars.PUBLIC_IPPSE_CIUDAD }}
+  PUBLIC_IPPSE_WHATSAPP: ${{ vars.PUBLIC_IPPSE_WHATSAPP }}
+  PUBLIC_IPPSE_DIRECCION: ${{ vars.PUBLIC_IPPSE_DIRECCION }}
+  PUBLIC_IPPSE_EMAIL_PRENSA: ${{ vars.PUBLIC_IPPSE_EMAIL_PRENSA }}
+  PUBLIC_IPPSE_TELEFONO_PRENSA: ${{ vars.PUBLIC_IPPSE_TELEFONO_PRENSA }}
+  PUBLIC_IPPSE_FACEBOOK: ${{ vars.PUBLIC_IPPSE_FACEBOOK }}
+  PUBLIC_IPPSE_INSTAGRAM: ${{ vars.PUBLIC_IPPSE_INSTAGRAM }}
+  PUBLIC_IPPSE_LINKEDIN: ${{ vars.PUBLIC_IPPSE_LINKEDIN }}
+  PUBLIC_IPPSE_X: ${{ vars.PUBLIC_IPPSE_X }}
+  PUBLIC_IPPSE_YOUTUBE: ${{ vars.PUBLIC_IPPSE_YOUTUBE }}
+  # Opcionales: estadísticas (Umami) y anti-spam (Turnstile).
+  PUBLIC_UMAMI_SRC: ${{ vars.PUBLIC_UMAMI_SRC }}
+  PUBLIC_UMAMI_ID: ${{ vars.PUBLIC_UMAMI_ID }}
+  PUBLIC_TURNSTILE_SITEKEY: ${{ vars.PUBLIC_TURNSTILE_SITEKEY }}
+
+jobs:
+  # Decide si hace falta compilar. Solo la revisión periódica puede saltearse:
+  # compara el último commit de documentos con el que figura en el sitio publicado.
+  comprobar:
+    runs-on: ubuntu-latest
+    outputs:
+      publicar: ${{ steps.decision.outputs.publicar }}
+    steps:
+      - id: decision
+        env:
+          URL_SITIO: ${{ vars.URL_SITIO || 'https://ippse.org.py' }}
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "publicar=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          ultimo=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$PUBLIC_DOCS_REPO/commits/$PUBLIC_DOCS_RAMA" | jq -r .sha || echo "")
+          publicado=$(curl -fsS "${URL_SITIO%/}/contenido-version.txt" | tr -d '[:space:]' || echo "")
+          echo "Último commit de documentos: ${ultimo:-?} · publicado: ${publicado:-?}"
+          if [ -n "$ultimo" ] && [ "$ultimo" = "$publicado" ]; then
+            echo "Sin cambios en el contenido: no se compila."
+            echo "publicar=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publicar=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  # cPanel / dominio propio (base "/").
+  build-cpanel:
+    needs: comprobar
+    if: needs.comprobar.outputs.publicar == 'true' && vars.PUBLICAR_CPANEL == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      # Archivos de contenido con errores: se omiten en el build y se avisa con un issue
+      # en el repositorio de documentos (se cierra solo cuando se corrigen).
+      - name: Avisar errores de contenido
+        run: node scripts/reportar-errores-contenido.mjs
+        env:
+          DOCS_ISSUES_TOKEN: ${{ secrets.DOCS_ISSUES_TOKEN }}
+      # Enlaces internos, HTML válido y accesibilidad (axe). Si el cambio es de código
+      # (push), un error frena la publicación; si es de contenido, solo avisa.
+      - name: Verificar sitio
+        run: npm run verificar
+        continue-on-error: ${{ github.event_name != 'push' }}
+      - name: Subir a cPanel por FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVIDOR }}
+          username: ${{ secrets.FTP_USUARIO }}
+          password: ${{ secrets.FTP_CLAVE }}
+          protocol: ftps
+          local-dir: ./dist/
+          server-dir: ${{ secrets.FTP_DIRECTORIO || 'public_html/' }}
+          # Solo sube lo que cambió (lleva un registro en el servidor).
+          state-name: .ftp-deploy-sync-state.json

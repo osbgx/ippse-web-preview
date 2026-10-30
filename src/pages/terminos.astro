@@ -1,0 +1,56 @@
+---
+import PaginaPolitica from '../components/PaginaPolitica.astro';
+import { conBase } from '../lib/rutas';
+import { contacto } from '../data/contacto';
+import { nombreInstitucion } from '../data/seo';
+---
+
+<PaginaPolitica
+  titulo="Términos de uso"
+  descripcion="Condiciones para usar el sitio del IPPSE y reproducir sus informes y contenidos."
+  actualizado="2026-10-24"
+>
+  <h2>Sobre el sitio</h2>
+  <p>
+    Este sitio pertenece al {nombreInstitucion} (IPPSE), asociación civil sin fines de lucro con sede en {contacto.ciudad}.
+    Al usarlo, aceptás estos términos.
+  </p>
+
+  <h2>Uso de los contenidos</h2>
+  <p>
+    Los informes, comunicados y demás textos del IPPSE pueden citarse y reproducirse con fines informativos, académicos
+    o periodísticos, siempre que se mencione la fuente (IPPSE) y no se altere su sentido. Cada informe ofrece una
+    <strong>cita sugerida</strong> en <a href={conBase('/publicaciones/')}>Informes y Publicaciones</a>.
+  </p>
+  <p>Para usos comerciales o reproducciones completas, pedí autorización previa a <a href={`mailto:${contacto.email}`}>{contacto.email}</a>.</p>
+
+  <h2>Marca y logos</h2>
+  <p>
+    El nombre y el logo del IPPSE pueden usarse para identificar a la institución en notas y presentaciones, con los
+    archivos del <a href={conBase('/prensa/kit/')}>kit de prensa</a> y sin modificarlos. No pueden usarse para sugerir
+    un respaldo o una opinión del IPPSE que no haya sido emitida oficialmente.
+  </p>
+
+  <h2>Opiniones oficiales</h2>
+  <p>
+    Solo representan la posición del IPPSE los documentos aprobados por su Comité Ejecutivo o su Reunión General de
+    Miembros, conforme a sus Estatutos. Las declaraciones personales de sus miembros no constituyen la opinión oficial
+    del Instituto.
+  </p>
+
+  <h2>Alcance de la información</h2>
+  <p>
+    Los informes tienen carácter técnico y orientativo. Muchos datos (costos, plazos, cronogramas) son estimaciones
+    basadas en información pública disponible a la fecha de cada documento, y pueden cambiar. El IPPSE no se hace
+    responsable por decisiones tomadas únicamente a partir de ellos.
+  </p>
+
+  <h2>Enlaces externos</h2>
+  <p>El sitio enlaza a medios y organismos externos. El IPPSE no controla esos sitios ni es responsable de su contenido.</p>
+
+  <h2>Datos personales</h2>
+  <p>El tratamiento de los datos del formulario de contacto se describe en la <a href={conBase('/privacidad/')}>política de privacidad</a>.</p>
+
+  <h2>Cambios</h2>
+  <p>El IPPSE puede actualizar estos términos. La versión vigente es siempre la publicada en esta página.</p>
+</PaginaPolitica>

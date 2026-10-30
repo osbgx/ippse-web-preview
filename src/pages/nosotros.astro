@@ -1,0 +1,106 @@
+---
+import { conBase } from '../lib/rutas';
+import { Icon } from 'astro-icon/components';
+import { getEntry, render } from 'astro:content';
+import LayoutBase from '../layouts/LayoutBase.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import { fundacion, historia, mision, vision, valores, equipo, descripcionCorta } from '../data/institucion';
+
+const descripcion =
+  'Historia, misión, valores y equipo del Instituto de Profesionales Paraguayos del Sector Eléctrico, ' +
+  'una asociación técnica independiente al servicio del desarrollo energético nacional.';
+
+// Documentos institucionales: se listan a partir de las secciones del Markdown
+const documento = await getEntry('institucional', 'constitucion');
+const documentos = documento ? (await render(documento)).headings.filter((h) => h.depth === 2) : [];
+---
+
+<LayoutBase titulo="Quiénes Somos" descripcion={descripcionCorta}>
+  <EncabezadoPagina titulo="Quiénes Somos" bajada={descripcion} />
+
+  <!-- Historia y fundamentos -->
+  <section aria-labelledby="historia-titulo" class="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+    <div class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-16">
+      <div>
+        <h2 id="historia-titulo" class="text-2xl font-bold leading-tight sm:text-3xl">{historia.titulo}</h2>
+        {historia.parrafos.map((p) => <p class="mt-4 max-w-3xl leading-relaxed text-gray-700">{p}</p>)}
+      </div>
+      <!-- Dato de fundación: una nota al margen, no una tarjeta -->
+      <aside class="self-start border-t-2 border-gray-900 pt-4 lg:mt-2" aria-label="Datos de fundación">
+        <p class="font-serif text-sm font-semibold text-gray-500">Fundado el</p>
+        <p class="mt-1 font-serif text-3xl font-bold leading-tight text-gray-900">{fundacion}</p>
+        <p class="mt-2 text-sm text-gray-600">Asunción, República del Paraguay</p>
+        <a href={conBase('/institucional/#acta-de-constitución')} class="mt-2 flex min-h-11 items-center text-sm font-semibold">Ver Acta de constitución</a>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Misión y visión: dos columnas de texto separadas por un filete -->
+  <section aria-labelledby="mision-titulo" class="border-y border-gray-200 bg-white">
+    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+      <h2 id="mision-titulo" class="text-2xl font-bold sm:text-3xl">Nuestro propósito y horizonte</h2>
+      <dl class="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-0 md:divide-x md:divide-gray-200">
+        <div class="md:pr-10">
+          <dt class="font-serif text-xl font-semibold text-gray-900">Misión</dt>
+          <dd class="mt-2 text-lg leading-relaxed text-gray-700">{mision}</dd>
+        </div>
+        <div class="md:pl-10">
+          <dt class="font-serif text-xl font-semibold text-gray-900">Visión</dt>
+          <dd class="mt-2 text-lg leading-relaxed text-gray-700">{vision}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- Valores -->
+  <section aria-labelledby="valores-titulo" class="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+    <h2 id="valores-titulo" class="text-2xl font-bold sm:text-3xl">Principios que guían nuestro trabajo</h2>
+    <ul class="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-3">
+      {valores.map(({ titulo, descripcion }) => (
+        <li class="border-t-2 border-py-rojo pt-4">
+          <h3 class="text-lg font-semibold">{titulo}</h3>
+          <p class="mt-2 leading-relaxed text-gray-600">{descripcion}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- Comisión directiva y equipo: filas de un listado, sin numerar (no es una secuencia) -->
+  <section aria-labelledby="equipo-titulo" class="border-y border-gray-200 bg-white">
+    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+      <h2 id="equipo-titulo" class="text-2xl font-bold sm:text-3xl">Referentes del sector eléctrico</h2>
+      <ul class="mt-8 divide-y divide-gray-200 border-y border-gray-200">
+        {equipo.map(({ nombre, rol, bio }) => (
+          <li class="grid grid-cols-1 gap-1 py-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-10">
+            <div>
+              <h3 class="text-lg font-semibold">{nombre}</h3>
+              <p class="mt-1 text-sm font-semibold text-py-azul">{rol}</p>
+            </div>
+            <p class="leading-relaxed text-gray-600">{bio}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Marco institucional: índice de documentos -->
+  <section aria-labelledby="marco-titulo" class="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <h2 id="marco-titulo" class="text-2xl font-bold sm:text-3xl">Documentos institucionales</h2>
+      <a href={conBase('/institucional/#descargas')} class="inline-flex min-h-11 items-center gap-2 font-semibold">
+        <Icon name="lucide:download" class="h-4 w-4" aria-hidden="true" />
+        Descargas en PDF
+      </a>
+    </div>
+    <ul class="mt-6 grid grid-cols-1 border-t border-gray-200 sm:grid-cols-2 sm:gap-x-10">
+      {documentos.map(({ slug, text }) => (
+        <li class="border-b border-gray-200">
+          <a href={conBase(`/institucional/#${slug}`)} class="group flex min-h-14 items-center justify-between gap-4 py-3 font-serif text-lg font-semibold text-gray-900 no-underline hover:text-py-azul">
+            {text}
+            <Icon name="lucide:chevron-right" class="h-5 w-5 shrink-0 text-gray-400 group-hover:text-py-rojo" aria-hidden="true" />
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</LayoutBase>

@@ -1,0 +1,45 @@
+---
+// Cinta de alertas: los avisos salen de alertas.ts; en idiomas espejo, del diccionario i18n.
+import { alertas } from '../data/alertas';
+import { diccionarios, type Idioma } from '../data/i18n';
+
+interface Props { lang?: Idioma }
+
+const { lang = 'es' } = Astro.props;
+const d = lang === 'es' ? null : diccionarios[lang];
+const etiqueta = d ? d.alertas.etiqueta : 'Última hora';
+const items = d
+  ? d.alertas.items
+  : alertas.map(({ tipo, texto, href }) => ({ tipo, texto, href }));
+---
+
+{items.length > 0 && (
+  <section aria-label={lang === 'es' ? 'Avisos importantes' : lang === 'en' ? 'Important notices' : 'Avisos importantes'} class="ticker flex items-stretch overflow-hidden border-b border-gray-200 bg-white text-sm">
+    <p class="font-serif z-10 flex shrink-0 items-center bg-py-rojo px-3 py-2 text-sm font-semibold text-white sm:px-4">
+      {etiqueta}
+    </p>
+    <div class="relative flex-1 overflow-hidden">
+      <div class="ticker-pista flex w-max">
+        {[false, true].map((duplicado) => (
+          <ul class="flex shrink-0 items-center" aria-hidden={duplicado ? 'true' : undefined}>
+            {items.map(({ tipo, texto, href }) => (
+              <li class="flex items-center whitespace-nowrap px-4 py-2 text-gray-700 sm:px-6">
+                <span
+                  class:list={[
+                    'font-serif mr-3 rounded-sm px-1.5 py-0.5 text-sm font-bold',
+                    tipo === 'Alerta' || tipo === 'Alert' ? 'bg-py-rojo/10 text-py-rojo-oscuro' : 'bg-py-azul-claro text-py-azul',
+                  ]}
+                >{tipo}</span>
+                {href ? (
+                  <a href={href} tabindex={duplicado ? -1 : undefined} class="font-medium">{texto}</a>
+                ) : (
+                  texto
+                )}
+              </li>
+            ))}
+          </ul>
+        ))}
+      </div>
+    </div>
+  </section>
+)}

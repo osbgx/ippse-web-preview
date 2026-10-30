@@ -1,0 +1,160 @@
+---
+import { Icon } from 'astro-icon/components';
+import FormularioBoletin from './FormularioBoletin.astro';
+import { conBase } from '../lib/rutas';
+import { navegacionPrincipal } from '../data/navegacion';
+import { descripcionCorta } from '../data/institucion';
+import { contacto, telefonoEnlace, canalWhatsApp, enlaceMembresia, redesSociales } from '../data/contacto';
+import { diccionarios, type Idioma } from '../data/i18n';
+
+interface Props { lang?: Idioma }
+
+const { lang = 'es' } = Astro.props;
+const d = lang === 'es' ? null : diccionarios[lang];
+
+const anio = new Date().getFullYear();
+const hrefUnirse = lang === 'en'
+  ? conBase('/en/contacto/?tipo=membresia#formulario')
+  : lang === 'pt'
+    ? conBase('/pt/contacto/?tipo=membresia#formulario')
+    : enlaceMembresia;
+const secciones = d
+  ? [
+      ...d.nav,
+      { etiqueta: d.footer.institucional, href: conBase('/institucional/') },
+    ]
+  : [
+      ...navegacionPrincipal,
+      { etiqueta: 'Documentos institucionales', href: conBase('/institucional/') },
+      { etiqueta: 'Datos', href: conBase('/datos/') },
+      { etiqueta: 'Socios', href: conBase('/socios/') },
+      { etiqueta: 'Glosario técnico', href: conBase('/glosario/') },
+      { etiqueta: 'Preguntas frecuentes', href: conBase('/preguntas-frecuentes/') },
+      { etiqueta: 'Kit de prensa', href: conBase('/prensa/kit/') },
+    ];
+const politicas = d
+  ? d.footer.politicas
+  : [
+      { etiqueta: 'Privacidad', href: conBase('/privacidad/') },
+      { etiqueta: 'Accesibilidad', href: conBase('/accesibilidad/') },
+      { etiqueta: 'Términos de uso', href: conBase('/terminos/') },
+      { etiqueta: 'RSS', href: conBase('/rss.xml') },
+    ];
+---
+
+<footer class="mt-16 border-t-4 border-py-azul bg-gray-900 text-gray-300">
+  <div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-10 sm:px-6 md:grid-cols-12 md:gap-8 md:py-14 lg:px-8">
+    <!-- Institución -->
+    <section aria-labelledby="pie-institucion" class="md:col-span-5 lg:col-span-4">
+      <h2 id="pie-institucion">
+        <a href={conBase('/')} class="-ml-2 inline-block">
+          <img src={conBase('/logo-ippse-blanco.svg')} alt="IPPSE" width="160" height="60" class="h-14 w-auto md:h-16" loading="lazy" />
+        </a>
+      </h2>
+      <p class="mt-3 max-w-md text-sm leading-relaxed">
+        Instituto de Profesionales Paraguayos del Sector Eléctrico. {d ? d.footer.descripcion : descripcionCorta}
+      </p>
+      <p class="font-serif mt-4 text-base font-semibold text-white">
+        {d ? d.footer.lema : 'Promoviendo la soberanía energética de Paraguay'}
+      </p>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <a
+          href={hrefUnirse}
+          class="font-serif inline-flex min-h-11 items-center rounded bg-py-rojo px-5 font-semibold text-white no-underline hover:bg-py-rojo-oscuro"
+        >{d ? d.footer.unirse : 'Unirse'}</a>
+        <a
+          href={canalWhatsApp}
+          target="_blank"
+          rel="noopener"
+          class="font-serif inline-flex min-h-11 items-center gap-2 rounded border border-gray-600 px-4 font-semibold text-white no-underline hover:border-white"
+        >
+          <Icon name="simple-icons:whatsapp" class="h-4 w-4" aria-hidden="true" />
+          {d ? d.footer.canalWhatsApp : 'Canal de WhatsApp'}
+          <span class="sr-only">{d ? d.footer.srNuevaPestana : '(abre en una pestaña nueva)'}</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Secciones: dos columnas en móvil para no alargar el pie -->
+    <nav aria-labelledby="pie-navegacion" class="md:col-span-4 lg:col-span-4 lg:col-start-6">
+      <h2 id="pie-navegacion" class="font-serif text-lg font-semibold text-white">{d ? d.footer.secciones : 'Secciones'}</h2>
+      <ul class="mt-3 grid grid-cols-2 gap-x-4 text-sm md:grid-cols-1">
+        {secciones.map(({ etiqueta, href }) => (
+          <li><a href={href} class="flex min-h-11 items-center text-gray-300 hover:text-white hover:underline md:min-h-9">{etiqueta}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <!-- Contacto -->
+    <section aria-labelledby="pie-contacto" class="md:col-span-3 lg:col-span-3">
+      <h2 id="pie-contacto" class="font-serif text-lg font-semibold text-white">{d ? d.footer.contacto : 'Contacto'}</h2>
+      <address class="mt-3 space-y-1 text-sm not-italic">
+        <p class="flex min-h-11 items-center gap-3 md:min-h-9">
+          <Icon name="lucide:map-pin" class="h-4 w-4 shrink-0 text-gray-500" aria-hidden="true" />
+          {contacto.direccion ? `${contacto.direccion}, ${contacto.ciudad}` : contacto.ciudad}
+        </p>
+        <p>
+          <a href={`mailto:${contacto.email}`} class="flex min-h-11 items-center gap-3 break-all text-gray-300 hover:text-white hover:underline md:min-h-9">
+            <Icon name="lucide:mail" class="h-4 w-4 shrink-0 text-gray-500" aria-hidden="true" />
+            {contacto.email}
+          </a>
+        </p>
+        <p>
+          <a href={`tel:${telefonoEnlace}`} class="flex min-h-11 items-center gap-3 text-gray-300 hover:text-white hover:underline md:min-h-9">
+            <Icon name="lucide:phone" class="h-4 w-4 shrink-0 text-gray-500" aria-hidden="true" />
+            {contacto.telefono}
+          </a>
+        </p>
+      </address>
+      {redesSociales.length > 0 && (
+        <ul class="mt-4 flex flex-wrap gap-2" aria-label={d ? d.footer.redes : 'Redes sociales'}>
+          {redesSociales.map(({ nombre, href, icono }) => (
+            <li>
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener"
+                class="flex h-11 w-11 items-center justify-center rounded border border-gray-700 text-gray-300 hover:border-white hover:text-white"
+              >
+                <Icon name={icono} class="h-5 w-5" aria-hidden="true" />
+                <span class="sr-only">{nombre} (abre en una pestaña nueva)</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  </div>
+
+  <!-- Boletín -->
+  <div class="border-t border-gray-700">
+    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <FormularioBoletin
+        tono="oscuro"
+        ancla="boletin"
+        lang={lang}
+        class="max-w-2xl"
+      />
+    </div>
+  </div>
+
+  <!-- Barra inferior: derechos y crédito en una fila en escritorio -->
+  <div class="border-t border-gray-700">
+    <div class="mx-auto flex max-w-7xl flex-col items-center gap-2 px-4 py-5 text-center text-xs text-gray-400 sm:px-6 md:flex-row md:justify-between md:text-left lg:px-8">
+      <div>
+        <p>© {anio} IPPSE · {d ? d.footer.derechos : 'Instituto de Profesionales Paraguayos del Sector Eléctrico. Todos los derechos reservados.'}</p>
+        <ul class="mt-1 flex flex-wrap justify-center gap-x-4 md:justify-start" aria-label={d ? d.footer.politicasTitulo : 'Políticas del sitio'}>
+          {politicas.map(({ etiqueta, href }) => (
+            <li><a href={href} class="inline-flex min-h-11 items-center text-gray-400 hover:text-white hover:underline md:min-h-8">{etiqueta}</a></li>
+          ))}
+        </ul>
+      </div>
+      <a
+        class="text-gray-400 underline hover:text-white"
+        href="https://osbgx.dev?utm_source=ippse&utm_medium=referral&utm_campaign=footer"
+        target="_blank"
+        rel="noopener"
+      >© osbgx.dev — Desarrollo web</a>
+    </div>
+  </div>
+</footer>

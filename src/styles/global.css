@@ -1,0 +1,367 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+@import '@fontsource/source-serif-4/latin-600.css';
+@import '@fontsource/source-serif-4/latin-700.css';
+@import '@fontsource-variable/source-sans-3/wght.css';
+
+/* Alto aproximado del header fijo, usado por scroll-padding-top.
+   Se ajusta por breakpoint para coincidir con el tamaño del logo. */
+:root {
+  --alto-logo: 5rem; /* alto del logo en escritorio; el nav toma su geometría de aquí */
+  --alto-header: 4.625rem; /* logo h-14 + py-2 + borde */
+}
+
+@media (min-width: 640px) {
+  :root {
+    --alto-header: 5.125rem; /* logo h-16 */
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --alto-header: calc(var(--alto-logo) + 1.5rem + 1px); /* logo + py-3 + borde */
+  }
+}
+
+/* Tokens de identidad IPPSE: fondos blanco/gris, acentos rojo y azul de la bandera paraguaya */
+@theme {
+  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Source Sans 3 Variable', 'Segoe UI', Roboto, Arial, sans-serif;
+
+  --color-py-rojo: #d52b1e;
+  --color-py-rojo-oscuro: #a8211a;
+  --color-py-azul: #0038a8;
+  --color-py-azul-oscuro: #00297a;
+  --color-py-azul-claro: #e8eefa;
+}
+
+@layer base {
+  html {
+    @apply bg-gray-50 text-gray-800 antialiased;
+    /* Deja libre el header fijo al saltar a un ancla (#seccion), para que el
+       título destino no quede tapado. Ver --alto-header en el Header. */
+    scroll-padding-top: calc(var(--alto-header, 6rem) + 0.5rem);
+  }
+
+  /* Red de seguridad contra el desplazamiento horizontal en móviles. "clip" (no "hidden")
+     no crea un contenedor de scroll, así el header sticky sigue funcionando. Las causas
+     reales se corrigen en cada componente (grid-cols-1 / minmax(0,…) en las grillas). */
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  body {
+    @apply bg-gray-50 font-sans;
+    /* Palabras o URLs largas se cortan solo si no entran en la línea */
+    overflow-wrap: break-word;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif text-gray-900;
+  }
+
+  a {
+    @apply text-py-azul underline-offset-2 hover:text-py-azul-oscuro;
+  }
+
+  /* Enlaces dentro de un texto: subrayados, para que no se distingan solo por el
+     color (WCAG 1.4.1). Los enlaces con clase propia (botones, menús) no se tocan. */
+  :where(p, li, dd, figcaption, td) > a:not([class]) {
+    @apply underline decoration-1;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-py-azul;
+  }
+}
+
+/*
+  Nav de escritorio alineado al logo (public/logo-ippse.svg, viewBox de 150 de alto):
+  - línea base de "IPPSE" en y=90  -> 60 % del alto
+  - franja roja entre y=105 y 115  -> del 70 % al 76,7 %
+  - franja azul termina en y=135   -> 90 %
+  El nav mide lo mismo que el logo, así cada enlace "se apoya" sobre la misma línea que el wordmark
+  y el indicador del enlace activo continúa la franja roja de la bandera.
+*/
+.nav-logo {
+  /* Entre 1024 y 1279 px el espacio es justo: enlaces más compactos */
+  --nav-texto: 1rem;
+  --nav-relleno: 0.5rem;
+  height: var(--alto-logo);
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+@media (min-width: 1280px) {
+  .nav-logo {
+    --nav-texto: 1.0625rem;
+    --nav-relleno: 0.75rem;
+    gap: 1.5rem;
+  }
+}
+
+.nav-logo-enlace {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  /* La caja de texto termina donde termina la línea base del logo (40 % desde abajo),
+     menos el descendente de la fuente (~0,22em con line-height 1) */
+  padding: 0 var(--nav-relleno) calc(var(--alto-logo) * 0.4 - 0.22em);
+  font-family: var(--font-serif);
+  font-size: var(--nav-texto);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--color-gray-700);
+  text-decoration: none;
+}
+
+/* Indicador: misma altura y posición vertical que la franja roja del logo */
+.nav-logo-enlace::after {
+  content: '';
+  position: absolute;
+  inset-inline: var(--nav-relleno);
+  top: calc(var(--alto-logo) * 0.7);
+  height: calc(var(--alto-logo) * 10 / 150);
+  background: var(--color-py-azul);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 180ms ease-out;
+}
+
+.nav-logo-enlace:hover {
+  color: var(--color-py-azul);
+}
+
+.nav-logo-enlace:hover::after {
+  transform: scaleX(1);
+}
+
+.nav-logo-enlace[aria-current] {
+  color: var(--color-gray-900);
+}
+
+.nav-logo-enlace[aria-current]::after {
+  background: var(--color-py-rojo);
+  transform: scaleX(1);
+}
+
+/* Acción "Unirse": su borde inferior coincide con el final de las franjas del logo */
+.nav-logo-accion {
+  align-self: flex-end;
+  margin-bottom: calc(var(--alto-logo) * 0.1);
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 calc(var(--nav-relleno) + 0.5rem);
+  border-radius: 0.25rem; /* mismo radio que el resto de los botones (rounded) */
+  background: var(--color-py-rojo);
+  font-family: var(--font-serif);
+  font-size: var(--nav-texto);
+  font-weight: 600;
+  color: var(--color-white);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav-logo-accion:hover {
+  background: var(--color-py-rojo-oscuro);
+  color: var(--color-white);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-logo-enlace::after {
+    transition: none;
+  }
+}
+
+/* Menú móvil: panel lateral derecho sobre un <dialog> modal */
+.menu-movil {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0;
+  padding: 0;
+  width: min(22rem, 100%);
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  border: 0;
+  background: var(--color-white);
+  box-shadow: -8px 0 24px rgb(0 0 0 / 0.15);
+}
+
+.menu-movil::backdrop {
+  background: rgb(17 24 39 / 0.55);
+}
+
+.menu-movil[open] {
+  animation: menu-entrar 200ms ease-out;
+}
+
+@keyframes menu-entrar {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* Bloquea el scroll de la página mientras el menú está abierto */
+html:has(.menu-movil[open]) {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-movil[open] {
+    animation: none;
+  }
+}
+
+/* Visor: tablas anchas con desplazamiento propio */
+.documento .tabla-desplazable {
+  @apply my-6 overflow-x-auto rounded border border-gray-200;
+}
+
+.documento .tabla-desplazable table {
+  @apply min-w-full text-sm whitespace-nowrap;
+}
+
+/* Visor: diagramas Mermaid */
+.documento .mermaid {
+  @apply my-6 flex overflow-x-auto rounded border border-gray-200 bg-white p-4;
+  /* "safe": si el diagrama es más ancho que el recuadro se alinea a la izquierda,
+     así el desplazamiento horizontal no deja su comienzo fuera de alcance. */
+  justify-content: safe center;
+}
+
+.documento .mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* El Gantt se dibuja con un ancho mínimo legible: en pantallas chicas se
+   desplaza dentro de su recuadro en vez de encogerse. */
+.documento .mermaid svg[aria-roledescription='gantt'] {
+  max-width: none;
+  flex-shrink: 0;
+}
+
+/* Las etiquetas que quedan fuera de su barra llevan un halo blanco para que
+   la grilla no las tache. */
+.documento .mermaid .taskTextOutsideRight,
+.documento .mermaid .taskTextOutsideLeft {
+  /* !important: Mermaid inyecta sus estilos con selectores de id. */
+  paint-order: stroke !important;
+  stroke: #fff !important;
+  stroke-width: 4px !important;
+  stroke-linejoin: round;
+}
+
+.documento .mermaid svg[aria-roledescription='gantt'] .grid .tick line {
+  stroke: #e5e7eb !important;
+}
+
+/* Si un diagrama no se puede dibujar, se muestra el código tal cual */
+.documento .mermaid-error {
+  @apply my-6 overflow-x-auto rounded border border-amber-200 bg-amber-50 p-4 text-sm;
+}
+
+/* Visor: fórmulas KaTeX */
+.documento .katex-display {
+  @apply my-6 overflow-x-auto py-1;
+}
+
+.documento .formula-invalida {
+  @apply rounded bg-amber-50 px-1 font-mono text-sm text-amber-800;
+}
+
+/* Visor: notas al pie */
+.documento .notas-separador {
+  @apply my-8 border-gray-200;
+}
+
+.documento .notas {
+  @apply list-decimal space-y-2 pl-6 text-sm text-gray-700;
+}
+
+.documento .nota-ref {
+  @apply text-xs;
+}
+
+.documento .nota-ref a {
+  @apply text-py-azul no-underline;
+}
+
+.documento .notas a[role='doc-backlink'] {
+  @apply text-py-rojo no-underline;
+}
+
+/* Notas al pie generadas en el build (GFM: [^1]) */
+.documento .footnotes {
+  @apply mt-12 border-t border-gray-200 pt-6 text-sm text-gray-700;
+}
+.documento .footnotes h2 {
+  @apply mt-0 border-0 pb-0 text-lg;
+}
+.documento [data-footnote-ref] {
+  @apply text-xs no-underline;
+}
+.documento [data-footnote-backref] {
+  @apply text-py-rojo no-underline;
+}
+
+/* Diagrama que no se pudo dibujar: se ve su código */
+.documento div.mermaid-error {
+  white-space: pre-wrap;
+  font-family: ui-monospace, monospace;
+}
+
+/* Impresión: solo el documento */
+@media print {
+  header, footer, .ticker, [data-indice] {
+    display: none !important;
+  }
+
+  .documento .tabla-desplazable {
+    overflow: visible;
+  }
+
+  .documento .tabla-desplazable table {
+    white-space: normal;
+  }
+
+  /* Las notas al pie y los diagramas deben verse completos al imprimir */
+  .documento .mermaid,
+  .documento .katex-display {
+    overflow: visible;
+  }
+
+  .documento .notas {
+    break-inside: avoid;
+  }
+}
+
+/* Formulario de contacto: "Especialidad" solo en la pestaña de membresía */
+.formulario-contacto:not(:has(input[name='tipo'][value='membresia']:checked)) .solo-membresia {
+  display: none;
+}
+
+/* Cinta de alertas: desplazamiento continuo, se pausa al pasar el puntero o enfocar */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.ticker-pista {
+  animation: ticker 40s linear infinite;
+}
+
+.ticker:hover .ticker-pista,
+.ticker:focus-within .ticker-pista {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-pista {
+    animation: none;
+  }
+}

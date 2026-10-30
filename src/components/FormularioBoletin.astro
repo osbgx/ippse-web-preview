@@ -1,0 +1,104 @@
+---
+// Suscripción al boletín: un campo de email y un botón. El envío lo procesa
+// public/suscribir.php (Brevo, con doble confirmación por email).
+// En idiomas espejo, los textos salen del diccionario i18n.
+import { conBase } from '../lib/rutas';
+import CamposProteccion from './CamposProteccion.astro';
+import { diccionarios, type Idioma } from '../data/i18n';
+
+interface Props {
+  /** "oscuro" para el pie (fondo gris oscuro); "claro" para el resto. */
+  tono?: 'claro' | 'oscuro';
+  class?: string;
+  /** id del formulario: suscribir.php vuelve a #boletin (el del pie). */
+  ancla?: string;
+  lang?: Idioma;
+}
+
+const { tono = 'claro', class: clase, ancla, lang = 'es' } = Astro.props;
+const d = lang === 'es' ? null : diccionarios[lang];
+
+const textos = d
+  ? {
+      titulo: d.boletin.titulo,
+      detalle: d.boletin.detalle,
+      boton: d.boletin.suscribirse,
+      politicaPfx:
+        (lang === 'en' ? 'See our ' : 'Conheça a '),
+      politicaLabel: d.boletin.politica,
+      privacidadHref: conBase('/privacidad/'),
+      mensajes: d.boletin.mensajes,
+    }
+  : {
+      titulo: 'Recibí los nuevos informes por email',
+      detalle: 'Solo cuando publicamos un informe o un comunicado. Te podés dar de baja cuando quieras.',
+      boton: 'Suscribirme',
+      politicaPfx: 'Ver la ',
+      politicaLabel: 'política de privacidad',
+      privacidadHref: conBase('/privacidad/'),
+      mensajes: {
+        pendiente: 'Listo: te enviamos un email. Confirmá la suscripción desde el enlace que recibiste.',
+        invalido: 'Ese email no es válido. Revisalo y volvé a intentar.',
+        error: 'No pudimos registrar la suscripción. Probá de nuevo en unos minutos.',
+        limite: 'Recibimos varias suscripciones seguidas desde tu conexión. Probá de nuevo en una hora.',
+      },
+    };
+
+const oscuro = tono === 'oscuro';
+const id = `boletin-email-${tono}`;
+---
+
+<form id={ancla} action={conBase('/suscribir.php')} method="post" class:list={['scroll-mt-24', clase]} data-boletin data-mensajes={JSON.stringify(textos.mensajes)}>
+  <label for={id} class:list={['font-serif block text-lg font-semibold', oscuro ? 'text-white' : 'text-gray-900']}>
+    {textos.titulo}
+  </label>
+  <p class:list={['mt-1 text-sm', oscuro ? 'text-gray-400' : 'text-gray-600']}>
+    {textos.detalle}
+  </p>
+  <div class="mt-3 flex flex-col gap-2 sm:flex-row">
+    <input
+      id={id}
+      name="email"
+      type="email"
+      required
+      autocomplete="email"
+      maxlength="160"
+      placeholder="tu@email.com"
+      class:list={[
+        'min-h-11 w-full min-w-0 flex-1 rounded border px-3 text-base focus:outline-2 focus:outline-offset-0',
+        oscuro
+          ? 'border-gray-600 bg-gray-800 text-white placeholder:text-gray-500 focus:outline-white'
+          : 'border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-py-azul',
+      ]}
+    />
+    <button
+      type="submit"
+      class:list={[
+        'font-serif min-h-11 shrink-0 rounded px-5 font-semibold',
+        oscuro ? 'bg-white text-gray-900 hover:bg-py-azul-claro' : 'bg-py-azul text-white hover:bg-py-azul-oscuro',
+      ]}
+    >{textos.boton}</button>
+  </div>
+  <!-- Anti-spam (trampa, tiempo mínimo, Turnstile opcional) y página de origen para volver -->
+  <CamposProteccion />
+  <input type="hidden" name="origen" value={Astro.url.pathname} />
+  <p class:list={['mt-2 text-xs', oscuro ? 'text-gray-400' : 'text-gray-600']}>
+    {textos.politicaPfx}<a href={textos.privacidadHref} class:list={['underline', oscuro ? 'text-gray-300' : '']}>{textos.politicaLabel}</a>.
+  </p>
+  <p role="status" class:list={['mt-2 hidden text-sm font-semibold', oscuro ? 'text-white' : 'text-gray-900']} data-boletin-estado></p>
+</form>
+
+<script>
+  // Resultado del envío (?boletin=…), devuelto por suscribir.php. Los textos
+  // viajan en el propio formulario (data-mensajes), así funcionan igual
+  // en español y en las páginas espejo.
+  const form = document.querySelector<HTMLFormElement>('[data-boletin]');
+  const mensajes: Record<string, string> = JSON.parse(form?.dataset.mensajes ?? '{}');
+  const estado = new URLSearchParams(location.search).get('boletin');
+  if (estado && mensajes[estado]) {
+    document.querySelectorAll<HTMLElement>('[data-boletin-estado]').forEach((p) => {
+      p.textContent = mensajes[estado];
+      p.classList.remove('hidden');
+    });
+  }
+</script>

@@ -1,0 +1,16 @@
+---
+// Destino del enlace de confirmación del boletín (Brevo redirige aquí).
+import LayoutBase from '../../layouts/LayoutBase.astro';
+import EncabezadoPagina from '../../components/EncabezadoPagina.astro';
+import { conBase } from '../../lib/rutas';
+---
+
+<LayoutBase titulo="Suscripción confirmada" descripcion="Tu suscripción al boletín del IPPSE quedó confirmada." noindex>
+  <EncabezadoPagina titulo="Suscripción confirmada" bajada="Vas a recibir por email los nuevos informes técnicos y comunicados del IPPSE." />
+  <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+    <p class="leading-relaxed text-gray-700">
+      Mientras tanto, podés leer los <a href={conBase('/publicaciones/')}>informes publicados</a> o seguir las novedades en
+      <a href={conBase('/prensa/')}>Prensa y Novedades</a>.
+    </p>
+  </div>
+</LayoutBase>

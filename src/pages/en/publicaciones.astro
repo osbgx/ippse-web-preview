@@ -1,0 +1,62 @@
+---
+// "Reports & Publications" en inglés: espejo simplificado de
+// src/pages/publicaciones.astro, sin buscador ni filtros: listado completo
+// (el archivo de informes es breve y el índice interactivo vive en español).
+import { Icon } from 'astro-icon/components';
+import LayoutBase from '../../layouts/LayoutBase.astro';
+import EncabezadoPagina from '../../components/EncabezadoPagina.astro';
+import TarjetaPublicacion from '../../components/TarjetaPublicacion.astro';
+import { diccionarios } from '../../data/i18n';
+import { conBase } from '../../lib/rutas';
+import { getPublicaciones } from '../../data/publicaciones';
+import { canalWhatsApp } from '../../data/contacto';
+
+const d = diccionarios.en;
+const t = d.contenido.publicaciones;
+const publicaciones = await getPublicaciones();
+const inicio = { etiqueta: d.ui.inicio, href: conBase('/en/') };
+---
+
+<LayoutBase
+  lang="en"
+  titulo={t.titulo}
+  descripcion={t.descripcion}
+  claves={['technical reports', 'energy diagnostics', 'power sector proposals']}
+>
+  <EncabezadoPagina titulo={t.titulo} bajada={t.descripcion} inicioEtiqueta={inicio.etiqueta} inicioHref={inicio.href} />
+
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-12 lg:px-8">
+    <p class="mt-2 text-sm text-gray-600">{t.notaArchivo}</p>
+
+    <p class="mt-6 text-sm text-gray-500" aria-live="polite">{publicaciones.length} {t.contador}</p>
+
+    <ul class="mt-4 grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {publicaciones.map((publicacion) => (
+        <li><TarjetaPublicacion publicacion={publicacion} nivel="h2" /></li>
+      ))}
+    </ul>
+
+    <!-- Canal de WhatsApp -->
+    <aside class="mt-10 rounded border border-gray-200 border-t-4 border-t-[#25D366] bg-gray-50 p-6 sm:p-8" aria-labelledby="wa-titulo">
+      <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div class="max-w-2xl">
+          <h2 id="wa-titulo" class="flex items-center gap-2 font-serif text-xl font-semibold text-gray-900 sm:text-2xl">
+            <Icon name="simple-icons:whatsapp" class="h-6 w-6 shrink-0 text-[#25D366]" aria-hidden="true" />
+            {t.wa.titulo}
+          </h2>
+          <p class="mt-3 leading-relaxed text-gray-700">{t.wa.texto}</p>
+        </div>
+        <a
+          href={canalWhatsApp}
+          target="_blank"
+          rel="noopener"
+          class="font-serif inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded bg-[#075E54] px-6 py-3 font-semibold text-white no-underline hover:bg-[#053f39]"
+        >
+          <Icon name="simple-icons:whatsapp" class="h-5 w-5 text-[#25D366]" aria-hidden="true" />
+          {t.wa.cta}
+          <span class="sr-only">{d.footer.srNuevaPestana}</span>
+        </a>
+      </div>
+    </aside>
+  </div>
+</LayoutBase>

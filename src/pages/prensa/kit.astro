@@ -1,0 +1,154 @@
+---
+// Kit de prensa: logos, texto institucional copiable, presidente y contacto directo.
+import { Icon } from 'astro-icon/components';
+import LayoutBase from '../../layouts/LayoutBase.astro';
+import EncabezadoPagina from '../../components/EncabezadoPagina.astro';
+import { conBase } from '../../lib/rutas';
+import { equipo, fundacion, fotoPresidente, historia, mision, citaPresidente } from '../../data/institucion';
+import { contactoPrensa } from '../../data/contacto';
+
+const presidente = equipo[0];
+
+// "¿Qué es el IPPSE?": textos institucionales literales, listos para pegar en una nota.
+const boilerplate = [
+  historia.parrafos[1],
+  historia.parrafos[0],
+  `Fundado el ${fundacion} en Asunción. Su misión: ${mision.charAt(0).toLowerCase()}${mision.slice(1)}`,
+];
+
+const logos = [
+  { nombre: 'Logo IPPSE (fondo claro)', vista: '/logo-ippse.svg', fondo: 'bg-white', archivos: [
+    { formato: 'SVG', ruta: '/logo-ippse.svg' }, { formato: 'PNG 2400 × 900', ruta: '/prensa/logo-ippse.png' },
+  ] },
+  { nombre: 'Logo IPPSE (fondo oscuro)', vista: '/logo-ippse-blanco.svg', fondo: 'bg-gray-900', archivos: [
+    { formato: 'SVG', ruta: '/logo-ippse-blanco.svg' }, { formato: 'PNG 2400 × 900', ruta: '/prensa/logo-ippse-blanco.png' },
+  ] },
+];
+
+const descripcion = 'Kit de prensa del IPPSE: logos en alta resolución, texto institucional, presidente y contacto directo para medios.';
+---
+
+<LayoutBase titulo="Kit de prensa" descripcion={descripcion} migas={[{ nombre: 'Prensa y Novedades', ruta: conBase('/prensa/') }]}>
+  <EncabezadoPagina
+    titulo="Kit de prensa"
+    migas={[{ etiqueta: 'Prensa y Novedades', href: conBase('/prensa/') }]}
+    bajada="Todo lo que un medio necesita para hablar del IPPSE: logos, texto institucional, vocero y contacto directo."
+  />
+
+  <div class="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 py-10 sm:px-6 md:py-14 lg:grid-cols-[minmax(0,1fr)_20rem] lg:px-8">
+    <div class="space-y-14">
+      <!-- ¿Qué es el IPPSE? -->
+      <section aria-labelledby="kit-boilerplate">
+        <h2 id="kit-boilerplate" class="border-b-2 border-py-azul pb-2 text-2xl font-bold sm:text-3xl">¿Qué es el IPPSE?</h2>
+        <p class="mt-3 text-sm text-gray-600">Texto institucional para usar en notas y presentaciones. Puede reproducirse citando la fuente.</p>
+        <div class="mt-5 rounded border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+          <div class="space-y-3 leading-relaxed text-gray-800" data-boilerplate>
+            {boilerplate.map((p) => <p>{p}</p>)}
+          </div>
+          <button type="button" class="font-serif mt-5 inline-flex min-h-11 items-center gap-2 rounded border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 hover:border-py-azul hover:text-py-azul" data-copiar-boilerplate>
+            <Icon name="lucide:copy" class="h-4 w-4" aria-hidden="true" />
+            <span data-copiar-texto>Copiar texto</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Logos -->
+      <section aria-labelledby="kit-logos">
+        <h2 id="kit-logos" class="border-b-2 border-py-azul pb-2 text-2xl font-bold sm:text-3xl">Logos</h2>
+        <p class="mt-3 text-sm text-gray-600">SVG para impresión y diseño; PNG con fondo transparente para web y TV. No modificar colores ni proporciones.</p>
+        <ul class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {logos.map((l) => (
+            <li class="overflow-hidden rounded border border-gray-200 bg-white shadow-sm">
+              <div class:list={['flex h-40 items-center justify-center p-6', l.fondo]}>
+                <img src={conBase(l.vista)} alt={l.nombre} width="240" height="90" class="h-20 w-auto" loading="lazy" />
+              </div>
+              <div class="border-t border-gray-100 p-4">
+                <p class="font-serif font-semibold text-gray-900">{l.nombre}</p>
+                <p class="mt-2 flex flex-wrap gap-x-5 gap-y-1">
+                  {l.archivos.map((a) => (
+                    <a href={conBase(a.ruta)} download class="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold">
+                      <Icon name="lucide:download" class="h-4 w-4" aria-hidden="true" />
+                      {a.formato}
+                    </a>
+                  ))}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <!-- Presidente -->
+      <section aria-labelledby="kit-presidente">
+        <h2 id="kit-presidente" class="border-b-2 border-py-azul pb-2 text-2xl font-bold sm:text-3xl">Presidente y vocero</h2>
+        <div class="mt-5 flex flex-col gap-5 rounded border border-gray-200 bg-white p-5 shadow-sm sm:flex-row sm:p-6">
+          {fotoPresidente ? (
+            <div class="shrink-0">
+              <img src={conBase(fotoPresidente)} alt={`${presidente.nombre}, foto oficial`} width="160" height="200" class="h-48 w-40 rounded object-cover" loading="lazy" />
+              <a href={conBase(fotoPresidente)} download class="mt-2 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold">
+                <Icon name="lucide:download" class="h-4 w-4" aria-hidden="true" />
+                Foto en alta
+              </a>
+            </div>
+          ) : (
+            <div class="flex h-40 w-32 shrink-0 flex-col items-center justify-center rounded bg-py-azul-claro text-center text-xs text-gray-600">
+              <Icon name="lucide:user" class="mb-2 h-10 w-10 text-py-azul" aria-hidden="true" />
+              Foto oficial a pedido
+            </div>
+          )}
+          <div>
+            <p class="font-serif text-xl font-semibold text-gray-900">{presidente.nombre}</p>
+            <p class="text-sm font-semibold text-py-rojo">{presidente.rol}</p>
+            <p class="mt-3 leading-relaxed text-gray-700">{presidente.bio}</p>
+            <blockquote class="font-serif mt-4 border-l-4 border-py-azul pl-4 italic text-gray-800">“{citaPresidente.texto}”</blockquote>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Contacto directo de prensa -->
+    <aside class="lg:sticky lg:top-6 lg:self-start" aria-labelledby="kit-contacto">
+      <div class="rounded border-l-8 border-py-rojo bg-py-azul p-6 text-white">
+        <h2 id="kit-contacto" class="text-xl font-bold text-white">Contacto de prensa</h2>
+        <p class="mt-2 text-gray-100">Entrevistas, declaraciones y consultas técnicas.</p>
+        <ul class="mt-4 space-y-1 text-sm">
+          <li>
+            <a href={`mailto:${contactoPrensa.email}`} class="flex min-h-11 items-center gap-3 break-all text-white">
+              <Icon name="lucide:mail" class="h-4 w-4 shrink-0" aria-hidden="true" />
+              {contactoPrensa.email}
+            </a>
+          </li>
+          <li>
+            <a href={`tel:${contactoPrensa.telefono.replace(/[\s()-]/g, '')}`} class="flex min-h-11 items-center gap-3 text-white">
+              <Icon name="lucide:phone" class="h-4 w-4 shrink-0" aria-hidden="true" />
+              {contactoPrensa.telefono}
+            </a>
+          </li>
+        </ul>
+        <a href={conBase('/contacto/#formulario')} class="font-serif mt-4 flex min-h-11 items-center justify-center rounded bg-white px-5 font-semibold text-py-azul no-underline hover:bg-py-azul-claro">
+          Escribir al equipo
+        </a>
+      </div>
+      <p class="mt-4 text-sm text-gray-600">
+        Para citar un informe, usá el botón “Copiar cita” en <a href={conBase('/publicaciones/')}>Informes y Publicaciones</a>.
+        Términos técnicos: <a href={conBase('/glosario/')}>glosario</a>.
+      </p>
+    </aside>
+  </div>
+
+  <script>
+    document.querySelector('[data-copiar-boilerplate]')?.addEventListener('click', async (e) => {
+      const boton = e.currentTarget as HTMLButtonElement;
+      const parrafos = [...document.querySelectorAll('[data-boilerplate] p')].map((p) => p.textContent?.trim());
+      const texto = parrafos.join('\n\n');
+      try {
+        await navigator.clipboard.writeText(texto);
+        const etiqueta = boton.querySelector('[data-copiar-texto]')!;
+        etiqueta.textContent = 'Texto copiado';
+        setTimeout(() => (etiqueta.textContent = 'Copiar texto'), 2500);
+      } catch {
+        window.prompt('Copiá el texto:', texto);
+      }
+    });
+  </script>
+</LayoutBase>

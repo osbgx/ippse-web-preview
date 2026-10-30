@@ -1,0 +1,165 @@
+---
+import { conBase } from '../../lib/rutas';
+import { getCollection, render } from 'astro:content';
+import LayoutBase from '../../layouts/LayoutBase.astro';
+import EncabezadoPagina from '../../components/EncabezadoPagina.astro';
+import { Icon } from 'astro-icon/components';
+import CoberturaMedios from '../../components/CoberturaMedios.astro';
+import { fechaCorta, getCoberturaPorInforme, tienePagina } from '../../data/prensa';
+import { getPublicaciones, urlVisor } from '../../data/publicaciones';
+import { imagenSocial } from '../../data/seo';
+
+/** Genera una página por cada entrada de prensa: /prensa/<id>/. */
+export async function getStaticPaths() {
+  const entradas = await getCollection('prensa');
+  // Las apariciones sin texto propio enlazan directo a la nota del medio (ver tienePagina).
+  return entradas.filter(tienePagina).map((entrada) => ({ params: { id: entrada.id }, props: { entrada } }));
+}
+
+const { entrada } = Astro.props;
+const { Content } = await render(entrada);
+const { tipo, fecha, titulo } = entrada.data;
+const tags = entrada.data.tags ?? [];
+const keywords = entrada.data.keywords ?? [];
+const todasLasPalabrasClave = [...new Set([...tags, ...keywords])];
+
+// Informes que la entrada declara en `informes`, con el resto de su cobertura.
+const cobertura = await getCoberturaPorInforme();
+const publicaciones = await getPublicaciones();
+const informesRelacionados = entrada.data.informes
+  .map((id) => ({ id, titulo: publicaciones.find((p) => p.id === id)?.titulo, notas: cobertura.get(id) ?? [] }))
+  .filter((i): i is { id: string; titulo: string; notas: typeof i.notas } => Boolean(i.titulo));
+
+// Texto y color según el tipo de entrada.
+const etiqueta = { comunicado: 'Comunicado de prensa', aparicion: 'Aparición en medios', evento: 'Evento' }[tipo];
+const migas = [{ etiqueta: 'Prensa y Novedades', href: conBase('/prensa/') }];
+// Fecha completa para metadatos (las entradas con solo AAAA-MM se fechan el día 1).
+const fechaIso = fecha.length === 7 ? `${fecha}-01` : fecha;
+const fechaModIso = entrada.data.actualizado
+  ? (entrada.data.actualizado.length === 7 ? `${entrada.data.actualizado}-01` : entrada.data.actualizado)
+  : fechaIso;
+const descripcion = tipo === 'comunicado' ? entrada.data.extracto : `${etiqueta} del IPPSE: ${titulo}.`;
+
+// Datos estructurados: los eventos como Event; comunicados y apariciones como NewsArticle.
+const urlPagina = new URL(Astro.url.pathname, Astro.site).href;
+const raiz = new URL(import.meta.env.BASE_URL, Astro.site).href;
+const nodo =
+  entrada.data.tipo === 'evento'
+    ? {
+        '@type': 'Event',
+        '@id': `${urlPagina}#evento`,
+        name: titulo,
+        description: descripcion,
+        startDate: fechaIso,
+        url: urlPagina,
+        inLanguage: 'es-PY',
+        eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+        location: {
+          '@type': 'Place',
+          name: entrada.data.lugar,
+          address: { '@type': 'PostalAddress', addressCountry: 'PY' },
+        },
+        organizer: { '@id': `${raiz}#organizacion` },
+        mainEntityOfPage: { '@id': `${urlPagina}#pagina` },
+      }
+    : {
+        '@type': 'NewsArticle',
+        '@id': `${urlPagina}#articulo`,
+        headline: titulo,
+        description: descripcion,
+        datePublished: fechaIso,
+        dateModified: fechaModIso,
+        inLanguage: 'es-PY',
+        articleSection: etiqueta,
+        ...(todasLasPalabrasClave.length > 0 && { keywords: todasLasPalabrasClave.join(', ') }),
+        inLanguage: entrada.data.idioma ?? 'es-PY',
+        author: { '@id': `${raiz}#organizacion` },
+        publisher: { '@id': `${raiz}#organizacion` },
+        image: new URL(conBase(imagenSocial.ruta), Astro.site).href,
+        mainEntityOfPage: { '@id': `${urlPagina}#pagina` },
+        ...(entrada.data.tipo === 'aparicion' && entrada.data.url && { isBasedOn: entrada.data.url }),
+      };
+---
+
+<LayoutBase
+  titulo={titulo}
+  descripcion={descripcion}
+  tipo="article"
+  publicado={tipo === 'evento' ? undefined : fechaIso}
+  migas={[{ nombre: 'Prensa y Novedades', ruta: conBase('/prensa/') }]}
+  schema={[nodo]}
+  imagenOg={conBase(`/og/prensa/${entrada.id}.png`)}
+>
+  <EncabezadoPagina titulo={titulo} migas={migas} bajada={tipo === 'comunicado' ? entrada.data.extracto : undefined}>
+    <p class="font-serif mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold">
+      <span class="rounded bg-py-azul px-2 py-1 text-white">{etiqueta}</span>
+      <time datetime={fecha} class="text-gray-500">{fechaCorta(fecha)}</time>
+      {tipo === 'aparicion' && <span class="text-py-azul">{entrada.data.medio}</span>}
+      {tipo === 'evento' && (
+        <>
+          <span class="text-py-rojo">{entrada.data.tipoEvento}</span>
+          <span class="text-gray-500">{entrada.data.lugar}</span>
+        </>
+      )}
+    </p>
+  </EncabezadoPagina>
+
+  <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 md:py-14 lg:px-8">
+    <article
+      class="prose prose-gray max-w-none break-words
+             prose-headings:font-serif prose-h2:mt-10 prose-h2:text-2xl prose-h2:scroll-mt-6 prose-h2:first:mt-0
+             prose-a:text-py-azul prose-strong:text-gray-900"
+    >
+      <Content />
+    </article>
+
+    {todasLasPalabrasClave.length > 0 && (
+      <ul class="mt-6 flex flex-wrap gap-2" aria-label="Etiquetas">
+        {todasLasPalabrasClave.map((t) => (
+          <li class="rounded-full border border-gray-300 bg-gray-50 px-3 py-1 text-sm text-gray-700">{t}</li>
+        ))}
+      </ul>
+    )}
+
+    {tipo === 'aparicion' && entrada.data.url && (
+      <p class="mt-8">
+        <a
+          href={entrada.data.url}
+          target="_blank"
+          rel="noopener"
+          class="font-serif inline-flex min-h-11 items-center rounded bg-py-azul px-5 font-semibold text-white no-underline hover:bg-py-azul-oscuro"
+        >
+          Ver la nota en {entrada.data.medio}
+          <span class="sr-only"> (abre en una pestaña nueva)</span>
+        </a>
+      </p>
+    )}
+
+    {tipo === 'evento' && (
+      <p class="mt-8">
+        <a
+          href={conBase(`/prensa/${entrada.id}.ics`)}
+          download
+          class="font-serif inline-flex min-h-11 items-center gap-2 rounded border border-gray-300 bg-white px-5 font-semibold text-gray-700 no-underline hover:border-py-azul hover:text-py-azul"
+        >
+          <Icon name="lucide:calendar-plus" class="h-4 w-4" aria-hidden="true" />
+          Agregar a mi calendario
+        </a>
+      </p>
+    )}
+
+    <!-- Informes relacionados y su cobertura en medios -->
+    {informesRelacionados.map(({ id, titulo: tituloInforme, notas }) => (
+      <div class="mt-10">
+        <p class="text-sm text-gray-600">
+          Relacionado con el <a href={urlVisor(id)} class="font-semibold">{tituloInforme}</a>.
+        </p>
+        <CoberturaMedios notas={notas.filter((n) => n.id !== entrada.id)} titulo="Otras notas sobre este informe" class="mt-4" />
+      </div>
+    ))}
+
+    <p class="mt-10 border-t border-gray-200 pt-6">
+      <a href={conBase('/prensa/')} class="font-semibold text-py-azul no-underline hover:underline">← Volver a Prensa y Novedades</a>
+    </p>
+  </div>
+</LayoutBase>

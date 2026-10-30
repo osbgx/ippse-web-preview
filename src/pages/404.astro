@@ -1,0 +1,22 @@
+---
+import { conBase } from '../lib/rutas';
+import LayoutBase from '../layouts/LayoutBase.astro';
+import { navegacionPrincipal } from '../data/navegacion';
+---
+
+<LayoutBase titulo="Página no encontrada" descripcion="La página solicitada no existe en el sitio del IPPSE." noindex>
+  <section class="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 md:py-24">
+    <p class="font-serif text-6xl font-bold text-py-azul sm:text-7xl">404</p>
+    <h1 class="mt-4 text-2xl font-bold sm:text-3xl">Página no encontrada</h1>
+    <p class="mt-3 text-gray-600">La dirección que buscás no existe o fue trasladada. Podés continuar desde alguna de estas secciones:</p>
+    <ul class="mt-8 grid grid-cols-1 gap-3 text-left sm:grid-cols-2">
+      {[...navegacionPrincipal, { etiqueta: 'Documentos institucionales', href: conBase('/institucional/') }].map(({ etiqueta, href }) => (
+        <li>
+          <a href={href} class="font-serif flex min-h-12 items-center justify-between rounded border border-gray-200 bg-white px-4 font-semibold text-gray-900 no-underline hover:border-py-azul hover:text-py-azul">
+            {etiqueta}<span class="text-py-rojo" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</LayoutBase>

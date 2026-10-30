@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="t">
+  <title id="t">IPPSE</title>
+  <rect width="64" height="64" fill="#ffffff" />
+  <text x="32" y="40" font-family="Times New Roman, Georgia, serif" font-size="22" font-weight="bold" fill="#000000" text-anchor="middle">
+    IPPSE
+  </text>
+  <!-- Franjas de la bandera paraguaya, de borde a borde -->
+  <rect x="0" y="46" width="64" height="6" fill="#D52B1E" />
+  <rect x="0" y="52" width="64" height="2" fill="#FFFFFF" />
+  <rect x="0" y="54" width="64" height="6" fill="#0038A8" />
+</svg>

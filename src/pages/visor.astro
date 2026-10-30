@@ -1,0 +1,28 @@
+---
+// Dirección antigua de los informes (/visor/?doc=<id>). Los informes ahora tienen
+// página propia generada en el build (/publicaciones/<id>/): esta página solo
+// redirige, para que sigan funcionando los enlaces ya compartidos.
+import LayoutBase from '../layouts/LayoutBase.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import { conBase } from '../lib/rutas';
+
+const destinoBase = conBase('/publicaciones/');
+---
+
+<LayoutBase titulo="Documento" descripcion="Redirección a la página del documento." noindex>
+  <EncabezadoPagina titulo="Abriendo el documento…" />
+  <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+    <p class="text-gray-700" data-mensaje>
+      Los informes ahora tienen su propia página. Si no se abre sola, buscalo en
+      <a href={destinoBase}>Informes y Publicaciones</a>.
+    </p>
+  </div>
+  <span hidden data-destino-base={destinoBase}></span>
+</LayoutBase>
+
+<script>
+  const base = document.querySelector<HTMLElement>('[data-destino-base]')?.dataset.destinoBase ?? '/publicaciones/';
+  const doc = new URLSearchParams(location.search).get('doc')?.trim() ?? '';
+  // Solo identificadores válidos (letras, números, guiones): nada de rutas arbitrarias.
+  location.replace(/^[a-z0-9][a-z0-9_-]*$/i.test(doc) ? `${base}${encodeURIComponent(doc)}/${location.hash}` : base);
+</script>

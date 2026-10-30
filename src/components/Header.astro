@@ -1,0 +1,159 @@
+---
+import { conBase } from '../lib/rutas';
+import { Icon } from 'astro-icon/components';
+import { navegacionPrincipal, seccionPadre } from '../data/navegacion';
+import { contacto, enlaceMembresia } from '../data/contacto';
+import { diccionarios, type Idioma } from '../data/i18n';
+
+interface Props { lang?: Idioma }
+
+const { lang = 'es' } = Astro.props;
+const d = lang === 'es' ? null : diccionarios[lang];
+const principal = d ? d.nav : navegacionPrincipal;
+const t = {
+  buscar: d ? d.ui.buscar : 'Buscar',
+  menu: d ? d.ui.menu : 'Menú',
+  cerrar: d ? d.ui.cerrar : 'Cerrar',
+  unirse: d ? d.ui.unirse : 'Unirse',
+  unirseLargo: d ? d.ui.unirseLargo : 'Unirse al IPPSE',
+  ariaLogo: d ? d.ui.ariaLogo : 'IPPSE — Ir al inicio',
+};
+// En idiomas espejo, solo marcas la sección activa en el menú principal;
+// las secciones extra (institucional, visor) siguen en español.
+const buscaSeccionPadre = (ruta: string) => (lang === 'es' ? seccionPadre[ruta] ?? ruta : ruta);
+
+const rutaActual = Astro.url.pathname.replace(/\/?$/, '/');
+const seccionActiva = buscaSeccionPadre(rutaActual);
+// "page" en la página exacta; "true" cuando se está en una subsección (p. ej. Institucional dentro de Nosotros)
+const esActual = (href: string) => (rutaActual === href ? 'page' : seccionActiva === href ? 'true' : undefined);
+// En idiomas espejo, "Unirse" lleva al formulario traducido; en español, tal como hoy.
+const hrefMembresia = lang === 'en'
+  ? conBase('/en/contacto/?tipo=membresia#formulario')
+  : lang === 'pt'
+    ? conBase('/pt/contacto/?tipo=membresia#formulario')
+    : enlaceMembresia;
+---
+
+<header class="sticky top-0 z-40 border-b border-gray-200 bg-white">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 sm:px-6 lg:gap-8 lg:py-3 lg:px-8">
+    <a href={conBase('/')} class="flex shrink-0 items-center no-underline" aria-label={t.ariaLogo}>
+      <img src={conBase('/logo-ippse.svg')} alt="IPPSE" width="213" height="80" class="h-14 w-auto sm:h-16 lg:h-(--alto-logo)" />
+    </a>
+
+    <!--
+      Navegación de escritorio (≥ 1024 px). Comparte la geometría del logo (ver .nav-logo en global.css):
+      el texto se apoya en la línea base de "IPPSE" y el indicador ocupa la altura de la franja roja.
+    -->
+    <nav aria-label="Navegación principal" class="nav-logo hidden self-stretch lg:flex">
+      <ul class="flex items-stretch">
+        {principal.map(({ etiqueta, href }) => (
+          <li class="flex">
+            <a href={href} aria-current={esActual(href)} class="nav-logo-enlace">
+              {etiqueta}
+            </a>
+          </li>
+        ))}
+        <li class="flex">
+          <a href={conBase('/buscar/')} aria-current={esActual(conBase('/buscar/'))} class="nav-logo-enlace" title={t.buscar}>
+            <Icon name="lucide:search" class="h-5 w-5" aria-hidden="true" />
+            <span class="sr-only">{t.buscar}</span>
+          </a>
+        </li>
+      </ul>
+      <a href={enlaceMembresia} class="nav-logo-accion">{t.unirse}</a>
+    </nav>
+
+    <!-- Buscar y menú (< 1024 px) -->
+    <div class="flex items-center gap-1 lg:hidden">
+    <a href={conBase('/buscar/')} class="inline-flex min-h-11 min-w-11 items-center justify-center rounded text-gray-900 hover:text-py-azul" aria-label={t.buscar}>
+      <Icon name="lucide:search" class="h-5 w-5" aria-hidden="true" />
+    </a>
+    <button
+      type="button"
+      class="inline-flex min-h-11 shrink-0 items-center gap-2 rounded px-2 font-serif text-base font-semibold text-gray-900 hover:text-py-azul lg:hidden"
+      aria-haspopup="dialog"
+      aria-controls="menu-movil"
+      aria-expanded="false"
+      data-menu-abrir
+    >
+      <Icon name="lucide:menu" class="h-5 w-5" aria-hidden="true" />
+      {t.menu}
+    </button>
+    </div>
+  </div>
+
+  <!-- Menú móvil: <dialog> nativo = foco atrapado, Escape, fondo inerte y capa superior -->
+  <dialog id="menu-movil" aria-label="Menú" class="menu-movil lg:hidden" data-menu>
+    <div class="flex h-full flex-col">
+      <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+        <img src={conBase('/logo-ippse.svg')} alt="IPPSE" width="160" height="60" class="h-14 w-auto" />
+        <button
+          type="button"
+          class="inline-flex min-h-11 items-center gap-2 rounded px-2 font-serif text-base font-semibold text-gray-900 hover:text-py-azul"
+          data-menu-cerrar
+        >
+          <Icon name="lucide:x" class="h-5 w-5" aria-hidden="true" />
+          {t.cerrar}
+        </button>
+      </div>
+
+      <nav aria-label="Navegación principal" class="flex-1 overflow-y-auto px-4 py-4">
+        <ul class="divide-y divide-gray-100">
+          {principal.map(({ etiqueta, href }) => (
+            <li>
+              <a
+                href={href}
+                aria-current={esActual(href)}
+                class:list={[
+                  'flex min-h-14 items-center border-l-[6px] px-4 font-serif text-xl font-semibold no-underline',
+                  esActual(href)
+                    ? 'border-py-rojo text-py-azul'
+                    : 'border-transparent text-gray-900 hover:border-py-azul hover:text-py-azul',
+                ]}
+              >
+                {etiqueta}
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <a href={hrefMembresia} class="mt-6 flex min-h-12 items-center justify-center rounded bg-py-rojo px-5 font-serif text-lg font-semibold text-white no-underline hover:bg-py-rojo-oscuro hover:text-white">
+          {t.unirseLargo}
+        </a>
+      </nav>
+
+      <address class="border-t border-gray-200 bg-gray-50 px-6 py-4 text-sm not-italic text-gray-600">
+        <p>{contacto.ciudad}</p>
+        <p><a href={`mailto:${contacto.email}`}>{contacto.email}</a></p>
+      </address>
+    </div>
+  </dialog>
+</header>
+
+<script>
+  const menu = document.querySelector<HTMLDialogElement>('[data-menu]');
+  const abrir = document.querySelector<HTMLButtonElement>('[data-menu-abrir]');
+  const cerrar = document.querySelector<HTMLButtonElement>('[data-menu-cerrar]');
+
+  if (menu && abrir) {
+    abrir.addEventListener('click', () => {
+      menu.showModal();
+      abrir.setAttribute('aria-expanded', 'true');
+    });
+
+    cerrar?.addEventListener('click', () => menu.close());
+
+    // Tocar el fondo oscuro (fuera del panel) cierra el menú
+    menu.addEventListener('click', (e) => {
+      if (e.target === menu) menu.close();
+    });
+
+    // Se dispara con Escape, el botón Cerrar o el fondo; el foco vuelve solo al botón Menú
+    menu.addEventListener('close', () => abrir.setAttribute('aria-expanded', 'false'));
+
+    // Si la ventana crece a escritorio con el menú abierto, se cierra
+    matchMedia('(min-width: 1024px)').addEventListener('change', (e) => {
+      if (e.matches && menu.open) menu.close();
+    });
+  }
+</script>
