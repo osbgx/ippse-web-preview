@@ -51,6 +51,25 @@ export async function dibujarDiagramas(contenedor: ParentNode = document) {
       sectionBkgColor: '#f8fafc',
       altSectionBkgColor: '#ffffff',
       sectionBkgColor2: '#f8fafc',
+      /* Gantt: el tema "base" deriva el borde de las tareas ":active" del primaryColor
+         (#e8eefa), casi invisible sobre blanco. Se fija en el azul institucional. */
+      activeTaskBorderColor: '#0038a8',
+      /* Gráficos xychart: fondo blanco y series en orden barras, línea roja, línea naranja
+         (los informes marcan así la "ALERTA ROJA" y la "ALERTA NARANJA"). */
+      /* Gráficos de torta: azul, rojo y azul claro de la paleta; textos legibles. */
+      pie1: '#0038a8',
+      pie2: '#d52b1e',
+      pie3: '#9db3e3',
+      pie4: '#e67e00',
+      pieStrokeColor: '#ffffff',
+      pieOpacity: '1',
+      pieSectionTextColor: '#ffffff',
+      pieTitleTextSize: '16px',
+      pieLegendTextColor: '#111827',
+      xyChart: {
+        backgroundColor: '#ffffff',
+        plotColorPalette: '#9db3e3, #d52b1e, #e67e00, #0038a8',
+      },
     },
     gantt: {
       useWidth: anchoGantt,

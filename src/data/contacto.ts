@@ -6,7 +6,7 @@
 //
 // Variables de entorno reconocidas (todas opcionales):
 //   PUBLIC_IPPSE_EMAIL          -> correo institucional
-//   PUBLIC_IPPSE_TELEFONO       -> teléfono tal como se muestra (ej. "+595 21 123 456")
+//   PUBLIC_IPPSE_TELEFONO       -> teléfono tal como se muestra (ej. "+595 984 143 700")
 //   PUBLIC_IPPSE_CIUDAD         -> ciudad (ej. "Asunción, Paraguay")
 //   PUBLIC_IPPSE_WHATSAPP       -> URL completa del canal de WhatsApp
 //   PUBLIC_IPPSE_DIRECCION      -> dirección física (si falta, no se muestra)
@@ -31,7 +31,7 @@ export const contacto = {
   ciudad: o(env.PUBLIC_IPPSE_CIUDAD, 'Asunción, Paraguay'),
   email: o(env.PUBLIC_IPPSE_EMAIL, 'contacto@ippse.org.py'),
   /** Teléfono tal como se muestra en pantalla. */
-  telefono: o(env.PUBLIC_IPPSE_TELEFONO, '+595 21 000 000'),
+  telefono: o(env.PUBLIC_IPPSE_TELEFONO, '+595 984 143 700'),
   /** Dirección física (calle y número). Vacía: no se muestra. */
   direccion: o(env.PUBLIC_IPPSE_DIRECCION, ''),
 };
@@ -63,9 +63,6 @@ export const redesSociales: RedSocial[] = [
 
 /** Teléfono listo para un enlace tel: (sin espacios ni guiones). */
 export const telefonoEnlace = contacto.telefono.replace(/[\s()-]/g, '');
-
-/** Botón "Unirse": abre el formulario de contacto con la pestaña de membresía seleccionada. */
-export const enlaceMembresia = conBase('/contacto/?tipo=membresia#formulario');
 
 /** Canal de WhatsApp: difusión de informes y participación ciudadana. */
 export const canalWhatsApp = o(

@@ -157,15 +157,15 @@ export const paginasIndexables: PaginaIndexable[] = [
   },
   {
     ruta: '/contacto/',
-    titulo: 'Contacto y Membresía',
-    descripcion: 'Contactá al IPPSE o solicitá tu membresía como profesional del sector eléctrico paraguayo.',
+    titulo: 'Contacto',
+    descripcion: 'Contactá al Instituto de Profesionales Paraguayos del Sector Eléctrico (IPPSE): consultas, prensa e instituciones.',
     prioridad: 0.7,
     frecuencia: 'yearly',
   },
   {
     ruta: '/datos/',
     titulo: 'Datos',
-    descripcion: 'Las cifras clave de los informes del IPPSE en gráficos: plazos, costos y potencia de las nuevas fuentes de generación.',
+    descripcion: 'Las cifras clave de los informes del IPPSE en gráficos: demanda y disponibilidad de potencia y energía, plazos, costos y potencia de las nuevas fuentes de generación.',
     prioridad: 0.8,
     frecuencia: 'monthly',
   },

@@ -17,6 +17,7 @@ datos del cliente o una decisión.
       actualizar `PUBLIC_DOCS_REPO`.
 
 ### Publicación automática — guía: `docs/publicacion-automatica.md`
+- [ ] Al tener el dominio: reactivar la revisión horaria (`schedule` comentado en `.github/workflows/publicar.yml`).
 - [ ] Secretos FTP en el repo del sitio: `FTP_SERVIDOR`, `FTP_USUARIO`, `FTP_CLAVE` (opcional `FTP_DIRECTORIO`).
 - [ ] Variables: `PUBLICAR_CPANEL=true`, `URL_SITIO`, `PUBLIC_DOCS_REPO`; `PUBLICAR_PAGES=false` al pasar a privado.
 - [ ] Token fino de GitHub (solo repo del sitio, *Contents: write*). Anotar fecha de vencimiento: ____.
@@ -54,7 +55,8 @@ datos del cliente o una decisión.
       la Content-Security-Policy (consola del navegador).
 
 ### Datos del cliente
-- [ ] Teléfono real (hoy `+595 21 000 000`, de ejemplo) → `PUBLIC_IPPSE_TELEFONO`.
+- [x] Teléfono real: `+595 984 143 700` (valor por defecto en `src/data/contacto.ts` y `.env.example`).
+- [ ] Cargar el mismo teléfono en la variable `PUBLIC_IPPSE_TELEFONO` de GitHub (Settings → Variables) al subir el sitio; si queda la vieja, pisa el valor nuevo.
 - [ ] Enlace real del canal de WhatsApp → `PUBLIC_IPPSE_WHATSAPP`.
 - [ ] Dirección física → `PUBLIC_IPPSE_DIRECCION`.
 - [ ] Redes sociales (Facebook, Instagram, LinkedIn, X, YouTube) → `PUBLIC_IPPSE_*`.
@@ -65,6 +67,9 @@ datos del cliente o una decisión.
 - [ ] Aprobar los textos nuevos redactados para el sitio: políticas (privacidad, accesibilidad,
       términos), definiciones del glosario, respuestas de la FAQ y el boilerplate del kit de prensa.
 - [ ] Revisión legal de la política de privacidad y los términos de uso.
+- [ ] Cómo se incorpora un miembro: el IPPSE lo va a indicar para sumarlo a `contenido/preguntas-frecuentes/`.
+      Mientras tanto se quitó todo "Solicitar membresía/Unirse" (header, footer, portada, formulario y PHP);
+      /socios/ conserva solo el proceso de los Estatutos (arts. 14-18).
 - [ ] Confirmar si "MIC insiste en industrializar…" y "Perspectivas divergentes…" (22/10/2026)
       citan el Informe 2/26: si es así, agregarles `informes: ["informe-2-26"]`.
 - [ ] Documento de prueba "Documento de referencia: formato Markdown admitido": no publicarlo

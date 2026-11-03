@@ -4,7 +4,7 @@ import FormularioBoletin from './FormularioBoletin.astro';
 import { conBase } from '../lib/rutas';
 import { navegacionPrincipal } from '../data/navegacion';
 import { descripcionCorta } from '../data/institucion';
-import { contacto, telefonoEnlace, canalWhatsApp, enlaceMembresia, redesSociales } from '../data/contacto';
+import { contacto, telefonoEnlace, canalWhatsApp, redesSociales } from '../data/contacto';
 import { diccionarios, type Idioma } from '../data/i18n';
 
 interface Props { lang?: Idioma }
@@ -13,11 +13,6 @@ const { lang = 'es' } = Astro.props;
 const d = lang === 'es' ? null : diccionarios[lang];
 
 const anio = new Date().getFullYear();
-const hrefUnirse = lang === 'en'
-  ? conBase('/en/contacto/?tipo=membresia#formulario')
-  : lang === 'pt'
-    ? conBase('/pt/contacto/?tipo=membresia#formulario')
-    : enlaceMembresia;
 const secciones = d
   ? [
       ...d.nav,
@@ -48,7 +43,7 @@ const politicas = d
     <section aria-labelledby="pie-institucion" class="md:col-span-5 lg:col-span-4">
       <h2 id="pie-institucion">
         <a href={conBase('/')} class="-ml-2 inline-block">
-          <img src={conBase('/logo-ippse-blanco.svg')} alt="IPPSE" width="160" height="60" class="h-14 w-auto md:h-16" loading="lazy" />
+          <img src={conBase('/logo-ippse-blanco.svg')} alt="IPPSE" width="160" height="60" class="aspect-[8/3] h-14 w-auto md:h-16" />
         </a>
       </h2>
       <p class="mt-3 max-w-md text-sm leading-relaxed">
@@ -58,10 +53,6 @@ const politicas = d
         {d ? d.footer.lema : 'Promoviendo la soberanía energética de Paraguay'}
       </p>
       <div class="mt-5 flex flex-wrap gap-3">
-        <a
-          href={hrefUnirse}
-          class="font-serif inline-flex min-h-11 items-center rounded bg-py-rojo px-5 font-semibold text-white no-underline hover:bg-py-rojo-oscuro"
-        >{d ? d.footer.unirse : 'Unirse'}</a>
         <a
           href={canalWhatsApp}
           target="_blank"
@@ -75,12 +66,12 @@ const politicas = d
       </div>
     </section>
 
-    <!-- Secciones: dos columnas en móvil para no alargar el pie -->
+    <!-- Secciones: siempre en dos columnas para no alargar el pie -->
     <nav aria-labelledby="pie-navegacion" class="md:col-span-4 lg:col-span-4 lg:col-start-6">
       <h2 id="pie-navegacion" class="font-serif text-lg font-semibold text-white">{d ? d.footer.secciones : 'Secciones'}</h2>
-      <ul class="mt-3 grid grid-cols-2 gap-x-4 text-sm md:grid-cols-1">
+      <ul class="mt-3 grid grid-cols-2 gap-x-6 text-sm">
         {secciones.map(({ etiqueta, href }) => (
-          <li><a href={href} class="flex min-h-11 items-center text-gray-300 hover:text-white hover:underline md:min-h-9">{etiqueta}</a></li>
+          <li><a href={href} class="flex min-h-11 items-center leading-snug text-gray-300 hover:text-white hover:underline md:min-h-9">{etiqueta}</a></li>
         ))}
       </ul>
     </nav>

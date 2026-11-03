@@ -1,5 +1,5 @@
 ---
-// "Contato e Associação" en portugués: espejo de src/pages/contacto.astro.
+// "Contato" en portugués: espejo de src/pages/contacto.astro.
 // El envío usa el mismo /enviar.php (mismos nombres de campo), con textos traducidos.
 import { Icon } from 'astro-icon/components';
 import LayoutBase from '../../layouts/LayoutBase.astro';
@@ -13,11 +13,6 @@ const d = diccionarios.pt;
 const t = d.contenido.contacto;
 const f = t.form;
 const inicio = { etiqueta: d.ui.inicio, href: conBase('/pt/') };
-
-const tipos = [
-  { valor: 'consulta', etiqueta: f.tabs.consulta, placeholder: f.consultaPlaceholder, boton: f.consultaBoton },
-  { valor: 'membresia', etiqueta: f.tabs.membresia, placeholder: f.membresiaPlaceholder, boton: f.membresiaBoton },
-];
 
 const datos = [
   { etiqueta: t.datos.sede, valor: contacto.direccion ? `${contacto.direccion}, ${contacto.ciudad}` : contacto.ciudad },
@@ -37,7 +32,7 @@ const etiquetaCampo = 'text-sm font-semibold text-gray-800';
   titulo={t.titulo}
   descripcion={t.descripcion}
 >
-  <EncabezadoPagina titulo={t.titulo} antetitulo={t.antetitulo} inicioEtiqueta={inicio.etiqueta} inicioHref={inicio.href} />
+  <EncabezadoPagina titulo={t.titulo} inicioEtiqueta={inicio.etiqueta} inicioHref={inicio.href} />
 
   <div class="mx-auto grid grid-cols-1 max-w-7xl gap-10 px-4 py-10 sm:px-6 md:py-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16 lg:px-8">
     <!-- Citação e dados -->
@@ -70,19 +65,7 @@ const etiquetaCampo = 'text-sm font-semibold text-gray-800';
         {f.avisoError} <a href={`mailto:${contacto.email}`}>{contacto.email}</a>.
       </div>
 
-      <form method="post" action={accionFormulario} class="formulario-contacto space-y-5" data-formulario data-textos={JSON.stringify({ membresia: f.membresiaBoton, consulta: f.consultaBoton })}>
-        <fieldset>
-          <legend class="sr-only">{f.srTipo}</legend>
-          <div class="grid grid-cols-2 gap-1 rounded bg-gray-100 p-1">
-            {tipos.map(({ valor, etiqueta }, i) => (
-              <label class="font-serif flex min-h-11 cursor-pointer items-center justify-center rounded px-2 text-center text-sm font-semibold text-gray-600 has-checked:bg-py-azul has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-py-azul">
-                <input type="radio" name="tipo" value={valor} checked={i === 0} class="sr-only" />
-                {etiqueta}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
+      <form method="post" action={accionFormulario} class="space-y-5" data-formulario>
         <div>
           <label for="nombre" class={etiquetaCampo}>{f.nombre} <span class="text-py-rojo" aria-hidden="true">*</span></label>
           <input id="nombre" name="nombre" type="text" required autocomplete="name" maxlength="120" placeholder={f.nombrePlaceholder} class={campo} />
@@ -93,14 +76,9 @@ const etiquetaCampo = 'text-sm font-semibold text-gray-800';
           <input id="email" name="email" type="email" required autocomplete="email" maxlength="160" placeholder="voce@email.com" class={campo} />
         </div>
 
-        <div class="solo-membresia">
-          <label for="especialidad" class={etiquetaCampo}>{f.especialidad} <span class="text-py-rojo" aria-hidden="true">*</span></label>
-          <input id="especialidad" name="especialidad" type="text" maxlength="160" placeholder={f.especialidadPlaceholder} class={campo} />
-        </div>
-
         <div>
           <label for="mensaje" class={etiquetaCampo}>{f.mensaje} <span class="text-py-rojo" aria-hidden="true">*</span></label>
-          <textarea id="mensaje" name="mensaje" required rows="5" maxlength="5000" placeholder={tipos[0]!.placeholder} class={campo} data-placeholders={JSON.stringify(Object.fromEntries(tipos.map((x) => [x.valor, x.placeholder])))}></textarea>
+          <textarea id="mensaje" name="mensaje" required rows="5" maxlength="5000" placeholder={f.consultaPlaceholder} class={campo}></textarea>
         </div>
 
         <div class="hidden" aria-hidden="true">
@@ -115,7 +93,7 @@ const etiquetaCampo = 'text-sm font-semibold text-gray-800';
         </p>
 
         <button type="submit" class="font-serif flex min-h-12 w-full items-center justify-center gap-2 rounded bg-py-azul px-6 font-semibold text-white hover:bg-py-azul-oscuro sm:w-auto" data-boton-enviar>
-          <span data-boton-texto>{tipos[0]!.boton}</span>
+          {f.consultaBoton}
           <Icon name="lucide:send" class="h-4 w-4" aria-hidden="true" />
         </button>
       </form>
@@ -124,33 +102,8 @@ const etiquetaCampo = 'text-sm font-semibold text-gray-800';
 </LayoutBase>
 
 <script>
-  // Mesma mecânica da página em espanhol: abas sem JS, placeholders por tipo
-  // e textos de botão traduzidos (viajam em data-textos do formulário).
-  const form = document.querySelector<HTMLFormElement>('[data-formulario]')!;
-  const especialidad = form.querySelector<HTMLInputElement>('#especialidad')!;
-  const mensaje = form.querySelector<HTMLTextAreaElement>('#mensaje')!;
-  const textoBoton = form.querySelector<HTMLElement>('[data-boton-texto]')!;
-  const textosBoton: Record<string, string> = JSON.parse(form.dataset.textos ?? '{}');
-  const placeholders: Record<string, string> = JSON.parse(mensaje.dataset.placeholders ?? '{}');
-
-  const aplicarTipo = (tipo: string) => {
-    const membresia = tipo === 'membresia';
-    especialidad.required = membresia;
-    mensaje.placeholder = placeholders[tipo] ?? '';
-    textoBoton.textContent = textosBoton[tipo] ?? '';
-  };
-
-  form.addEventListener('change', (e) => {
-    const radio = e.target as HTMLInputElement;
-    if (radio.name === 'tipo') aplicarTipo(radio.value);
-  });
-
-  // ?tipo=membresia (botão "Entrar no IPPSE") preseleciona a aba; ?enviado=1 /?error=1 os coloca o PHP
+  // ?enviado=1 / ?error=1 los agrega enviar.php al volver
   const params = new URLSearchParams(location.search);
-  const tipoInicial = params.get('tipo') === 'membresia' ? 'membresia' : 'consulta';
-  form.querySelector<HTMLInputElement>(`input[name="tipo"][value="${tipoInicial}"]`)!.checked = true;
-  aplicarTipo(tipoInicial);
-
   for (const aviso of ['enviado', 'error']) {
     if (params.get(aviso) === '1') document.querySelector(`[data-aviso="${aviso}"]`)?.classList.remove('hidden');
   }

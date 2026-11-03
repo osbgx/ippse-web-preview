@@ -24,7 +24,7 @@ destacado: true
 
 Recientemente, en fecha 29.06.2026, el IPPSE ha emitido un Informe titulado “Requerimientos de Generación Eléctrica para cubrir la Demanda de Potencia y el Consumo de Energía del Paraguay – Riesgo de Crisis Energética – Periodo 2026-2035”, abarcando el corto y mediano plazo (5 y 10 años), que será elaborado en 3 partes:
 
-*   **Parte I** – Fuentes actuales
+*   **Parte I** – [Fuentes actuales](./informe-1-26.md)
 *   **Parte II** – Alternativas de nuevas fuentes
 *   **Parte III** – Planes de expansión
 

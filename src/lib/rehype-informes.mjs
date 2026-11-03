@@ -16,6 +16,33 @@
 const texto = (nodo) =>
   nodo.type === 'text' ? nodo.value : (nodo.children ?? []).map(texto).join('');
 
+const elementos = (nodo, tag) =>
+  (nodo.children ?? []).flatMap((c) =>
+    c.type !== 'element' ? [] : c.tagName === tag ? [c] : elementos(c, tag),
+  );
+
+const agregarClase = (nodo, clase) => {
+  nodo.properties ??= {};
+  const actuales = nodo.properties.className ?? [];
+  nodo.properties.className = [...(Array.isArray(actuales) ? actuales : [actuales]), clase];
+};
+
+/**
+ * Colores de los informes sin HTML en el Markdown (el repositorio queda legible para el RAG):
+ *   - Fila que menciona "ALERTA ROJA" / "ALERTA NARANJA": fondo rojo / naranja claro.
+ *   - Celda numérica negativa ("- 566", "-1.236"): déficit, en rojo.
+ */
+const marcarAlertas = (tabla) => {
+  for (const fila of elementos(tabla, 'tr')) {
+    const contenido = texto(fila).toUpperCase();
+    if (contenido.includes('ALERTA ROJA')) agregarClase(fila, 'fila-alerta-roja');
+    else if (contenido.includes('ALERTA NARANJA')) agregarClase(fila, 'fila-alerta-naranja');
+    for (const celda of elementos(fila, 'td')) {
+      if (/^\s*[-−–]\s*\d/.test(texto(celda))) agregarClase(celda, 'valor-deficit');
+    }
+  }
+};
+
 export default function rehypeInformes() {
   return (arbol) => {
     const recorrer = (padre) => {
@@ -43,6 +70,7 @@ export default function rehypeInformes() {
         }
 
         if (nodo.tagName === 'table') {
+          marcarAlertas(nodo);
           hijos[i] = {
             type: 'element',
             tagName: 'div',

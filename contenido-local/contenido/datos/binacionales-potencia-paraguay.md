@@ -4,7 +4,7 @@ descripcion: "Parte de la potencia de cada proyecto hidroeléctrico binacional q
 informe: informe-2-26
 forma: barras
 unidad: "MW"
-orden: 3
+orden: 7
 ---
 Potencia que correspondería al Paraguay en cada emprendimiento binacional, en megavatios.
 

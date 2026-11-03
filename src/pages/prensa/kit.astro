@@ -60,7 +60,7 @@ const descripcion = 'Kit de prensa del IPPSE: logos en alta resolución, texto i
           {logos.map((l) => (
             <li class="overflow-hidden rounded border border-gray-200 bg-white shadow-sm">
               <div class:list={['flex h-40 items-center justify-center p-6', l.fondo]}>
-                <img src={conBase(l.vista)} alt={l.nombre} width="240" height="90" class="h-20 w-auto" loading="lazy" />
+                <img src={conBase(l.vista)} alt={l.nombre} width="240" height="90" class="aspect-[8/3] h-20 w-auto" />
               </div>
               <div class="border-t border-gray-100 p-4">
                 <p class="font-serif font-semibold text-gray-900">{l.nombre}</p>

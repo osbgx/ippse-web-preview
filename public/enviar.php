@@ -15,9 +15,11 @@ $configContacto = is_readable(dirname(__DIR__) . '/ippse-config/contacto.php')
 define('DESTINO', $configContacto['destino'] ?? 'contacto@ippse.org.py');
 define('REMITENTE', $configContacto['remitente'] ?? 'web@ippse.org.py');
 
-function volver(string $estado, string $tipo = 'consulta'): void {
-    $consulta = $tipo === 'membresia' ? "tipo=membresia&$estado=1" : "$estado=1";
-    header("Location: /contacto/?$consulta#formulario", true, 303);
+/** Vuelve a la página de contacto desde la que se envió (es, en o pt) con el resultado. */
+function volver(string $estado): void {
+    $origen = (string) parse_url($_SERVER['HTTP_REFERER'] ?? '', PHP_URL_PATH);
+    $pagina = preg_match('#^(/[a-z0-9-]+)?/(en/|pt/)?contacto/$#', $origen) ? $origen : '/contacto/';
+    header("Location: $pagina?$estado=1#formulario", true, 303);
     exit;
 }
 
@@ -30,28 +32,22 @@ function limpiar(string $clave, int $max): string {
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') volver('error');
 
-$tipo = ($_POST['tipo'] ?? '') === 'membresia' ? 'membresia' : 'consulta';
-
 // Bots evidentes (trampa o envío instantáneo): se finge éxito y no se envía nada,
 // así no aprenden a esquivar la protección.
-if (ippse_es_bot()) volver('enviado', $tipo);
-if (!ippse_turnstile_valido()) volver('error', $tipo);
+if (ippse_es_bot()) volver('enviado');
+if (!ippse_turnstile_valido()) volver('error');
 // Hasta 5 mensajes por hora desde la misma conexión.
-if (!ippse_dentro_del_limite('contacto', 5, 3600)) volver('limite', $tipo);
+if (!ippse_dentro_del_limite('contacto', 5, 3600)) volver('limite');
 
 $nombre = limpiar('nombre', 120);
 $email = limpiar('email', 160);
-$especialidad = limpiar('especialidad', 160);
 $mensaje = limpiar('mensaje', 5000);
 
-if ($nombre === '' || $mensaje === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) volver('error', $tipo);
-if ($tipo === 'membresia' && $especialidad === '') volver('error', $tipo);
-if (ippse_parece_spam($mensaje)) volver('enviado', $tipo);
+if ($nombre === '' || $mensaje === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) volver('error');
+if (ippse_parece_spam($mensaje)) volver('enviado');
 
-$asunto = $tipo === 'membresia' ? 'Solicitud de membresía' : 'Consulta general';
-$cuerpo = "Tipo: $asunto\nNombre: $nombre\nEmail: $email\n";
-if ($tipo === 'membresia') $cuerpo .= "Especialidad / Área: $especialidad\n";
-$cuerpo .= "\nMensaje:\n$mensaje\n";
+$asunto = 'Consulta';
+$cuerpo = "Nombre: $nombre\nEmail: $email\n\nMensaje:\n$mensaje\n";
 
 $cabeceras = implode("\r\n", [
     'From: IPPSE Web <' . REMITENTE . '>',
@@ -60,4 +56,4 @@ $cabeceras = implode("\r\n", [
 ]);
 
 $ok = mail(DESTINO, '=?UTF-8?B?' . base64_encode("[Web IPPSE] $asunto — $nombre") . '?=', $cuerpo, $cabeceras);
-volver($ok ? 'enviado' : 'error', $tipo);
+volver($ok ? 'enviado' : 'error');

@@ -148,29 +148,6 @@
   transform: scaleX(1);
 }
 
-/* Acción "Unirse": su borde inferior coincide con el final de las franjas del logo */
-.nav-logo-accion {
-  align-self: flex-end;
-  margin-bottom: calc(var(--alto-logo) * 0.1);
-  display: flex;
-  align-items: center;
-  min-height: 2.75rem;
-  padding: 0 calc(var(--nav-relleno) + 0.5rem);
-  border-radius: 0.25rem; /* mismo radio que el resto de los botones (rounded) */
-  background: var(--color-py-rojo);
-  font-family: var(--font-serif);
-  font-size: var(--nav-texto);
-  font-weight: 600;
-  color: var(--color-white);
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.nav-logo-accion:hover {
-  background: var(--color-py-rojo-oscuro);
-  color: var(--color-white);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .nav-logo-enlace::after {
     transition: none;
@@ -225,6 +202,40 @@ html:has(.menu-movil[open]) {
   @apply min-w-full text-sm whitespace-nowrap;
 }
 
+/* Encabezado gris y filas de alerta (las clases las pone rehype-informes.mjs) */
+.documento .tabla-desplazable thead tr {
+  @apply bg-gray-100;
+}
+
+.documento .tabla-desplazable :is(th, td) {
+  @apply px-3;
+}
+
+.documento .tabla-desplazable tr.fila-alerta-roja {
+  @apply bg-[#ffebee] font-bold text-[#8e1b12];
+}
+
+.documento .tabla-desplazable tr.fila-alerta-naranja {
+  @apply bg-[#fff3e0] font-bold text-[#7a3d00];
+}
+
+.documento .tabla-desplazable td.valor-deficit,
+.documento .tabla-desplazable td.valor-deficit strong {
+  @apply font-bold text-py-rojo;
+}
+
+.documento .tabla-desplazable tr:is(.fila-alerta-roja, .fila-alerta-naranja) strong {
+  color: inherit;
+}
+
+/* Tortas: porcentajes blancos con halo oscuro, legibles aunque la porción sea chica. */
+.documento .mermaid svg[aria-roledescription='pie'] .slice {
+  paint-order: stroke !important;
+  stroke: #111827 !important;
+  stroke-width: 3px !important;
+  stroke-linejoin: round;
+}
+
 /* Visor: diagramas Mermaid */
 .documento .mermaid {
   @apply my-6 flex overflow-x-auto rounded border border-gray-200 bg-white p-4;
@@ -242,6 +253,12 @@ html:has(.menu-movil[open]) {
    desplaza dentro de su recuadro en vez de encogerse. */
 .documento .mermaid svg[aria-roledescription='gantt'] {
   max-width: none;
+  flex-shrink: 0;
+}
+
+/* Igual con los gráficos xychart: por debajo de 560 px los textos quedan ilegibles. */
+.documento .mermaid svg[aria-roledescription='xychart'] {
+  min-width: 560px;
   flex-shrink: 0;
 }
 
@@ -338,11 +355,6 @@ html:has(.menu-movil[open]) {
   .documento .notas {
     break-inside: avoid;
   }
-}
-
-/* Formulario de contacto: "Especialidad" solo en la pestaña de membresía */
-.formulario-contacto:not(:has(input[name='tipo'][value='membresia']:checked)) .solo-membresia {
-  display: none;
 }
 
 /* Cinta de alertas: desplazamiento continuo, se pausa al pasar el puntero o enfocar */

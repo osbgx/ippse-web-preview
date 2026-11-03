@@ -5,6 +5,11 @@ import Header from '../components/Header.astro';
 import CintaAlertas from '../components/CintaAlertas.astro';
 import Footer from '../components/Footer.astro';
 import Estadisticas from '../components/Estadisticas.astro';
+// Fuentes de la primera pantalla: se precargan para que el texto no "salte" al cambiar
+// de la fuente del sistema a la web (CLS). Son los mismos archivos que usa global.css.
+import fuenteSerif700 from '@fontsource/source-serif-4/files/source-serif-4-latin-700-normal.woff2?url';
+import fuenteSerif600 from '@fontsource/source-serif-4/files/source-serif-4-latin-600-normal.woff2?url';
+import fuenteSans from '@fontsource-variable/source-sans-3/files/source-sans-3-latin-wght-normal.woff2?url';
 import { feeds } from '../lib/rss';
 import {
   autorSitio, esCopiaDeRevision, imagenSocial, nodosBase, nombreInstitucion, nombreSitio, palabrasClave,
@@ -122,6 +127,9 @@ const grafo = {
 <html lang={lang === 'es' ? 'es-PY' : lang === 'en' ? 'en' : 'pt-BR'} prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="utf-8" />
+    {[fuenteSerif700, fuenteSerif600, fuenteSans].map((href) => (
+      <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
+    ))}
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{tituloCompleto}</title>
     <meta name="description" content={descripcion} />
@@ -139,7 +147,8 @@ const grafo = {
           ['pt-BR', alt.pt],
           ['x-default', alt.xDefault],
         ] as const;
-        return nodos.map(([hl, href]) => <link rel="alternate" hreflang={hl} href={href} />);
+        // hreflang exige URLs absolutas (Google ignora las relativas)
+        return nodos.map(([hl, href]) => <link rel="alternate" hreflang={hl} href={new URL(href, Astro.site).href} />);
       })()
     ) : (
       <>

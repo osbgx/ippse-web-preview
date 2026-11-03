@@ -10,6 +10,17 @@ Estas imagenes se descargaron del sitio de referencia para uso en el proyecto IP
 | `390840802_generated_d56ac8c6.webp` | Card de informe / sección técnica | Sala de control eléctrico | 1536x1024 |
 | `726c04d4d_generated_f07a7368.webp` | Card de informe / sección energética | Represa de Itaipú al atardecer | 1024x1024 |
 
+## Recortes de Itaipú para la banda de la portada
+
+Generados con `sharp` a partir de `726c04d4d_generated_f07a7368.webp` (que se conserva como fuente),
+para no descargar la foto cuadrada completa en una banda baja (ver `<picture>` en `src/pages/index.astro`).
+
+| Archivo | Uso | Dimensiones |
+|---|---|---|
+| `itaipu-banda-movil-640.webp` | Móvil (< 640 px), 1× | 640x344 |
+| `itaipu-banda-movil-1024.webp` | Móvil, pantallas 2× | 1024x550 |
+| `itaipu-banda-1024.webp` | Desde 640 px | 1024x218 |
+
 ## Thumbnails (600x600, webp)
 
 - `*-thumb.webp`: versiones recortadas cuadradas para cards y galerías.

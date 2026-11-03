@@ -5,7 +5,6 @@ import { getCollection } from 'astro:content';
 import LayoutBase from '../layouts/LayoutBase.astro';
 import EncabezadoPagina from '../components/EncabezadoPagina.astro';
 import { conBase } from '../lib/rutas';
-import { enlaceMembresia } from '../data/contacto';
 
 const nombresCategoria = {
   fundador: 'Miembro Fundador',
@@ -28,7 +27,7 @@ const categorias = [
 
 // El ingreso es una secuencia real (Estatutos arts. 15-16; Reglamento art. 12): se numera.
 const pasos = [
-  { titulo: 'Candidatura', texto: 'Dos (2) Miembros del IPPSE presentan la candidatura del profesional. Si te interesa ingresar, podés escribirnos y te orientamos.' },
+  { titulo: 'Candidatura', texto: 'Dos (2) Miembros del IPPSE presentan la candidatura del profesional.' },
   { titulo: 'Calificación', texto: 'El Comité Ejecutivo califica al profesional, en base a los Estatutos y el Reglamento Interno.' },
   { titulo: 'Votación', texto: 'El Comité Ejecutivo aprueba la incorporación por el sistema de bolillas blancas; la desaprobación, por bolilla negra.' },
   { titulo: 'Invitación', texto: 'El Comité Ejecutivo invita expresamente al profesional a incorporarse como Miembro.' },
@@ -38,7 +37,7 @@ const pasos = [
 <LayoutBase
   titulo="Socios"
   descripcion="Cómo ser miembro del IPPSE: requisitos, categorías, proceso de ingreso y directorio de socios."
-  claves={['membresía IPPSE', 'socios IPPSE', 'profesionales sector eléctrico Paraguay']}
+  claves={['socios IPPSE', 'profesionales sector eléctrico Paraguay']}
 >
   <EncabezadoPagina
     titulo="Socios"
@@ -75,9 +74,6 @@ const pasos = [
         ))}
       </ol>
       <div class="mt-6 flex flex-wrap items-center gap-4">
-        <a href={enlaceMembresia} class="font-serif inline-flex min-h-11 items-center rounded bg-py-rojo px-6 font-semibold text-white no-underline hover:bg-py-rojo-oscuro">
-          Solicitar información para ingresar
-        </a>
         <a href={conBase('/institucional/#estatutos')} class="inline-flex min-h-11 items-center font-semibold">Leer los Estatutos</a>
       </div>
     </section>

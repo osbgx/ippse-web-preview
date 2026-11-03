@@ -171,5 +171,15 @@ const schema = [
   const indice = document.querySelector<HTMLDetailsElement>('[data-indice-details]');
   if (indice && !matchMedia('(min-width: 1024px)').matches) indice.open = false;
 
-  if (document.querySelector('[data-con-diagramas]')) void dibujarDiagramas(document.querySelector('.documento') ?? document);
+  // Mermaid pesa ~600 KB: se descarga recién cuando el primer diagrama se acerca a la
+  // pantalla, así no compite con la carga inicial del informe.
+  const primerDiagrama = document.querySelector('.documento .mermaid');
+  if (document.querySelector('[data-con-diagramas]') && primerDiagrama) {
+    const observador = new IntersectionObserver((entradas) => {
+      if (!entradas.some((e) => e.isIntersecting)) return;
+      observador.disconnect();
+      void dibujarDiagramas(document.querySelector('.documento') ?? document);
+    }, { rootMargin: '800px 0px' });
+    observador.observe(primerDiagrama);
+  }
 </script>

@@ -113,12 +113,6 @@ export const ejesEstrategicos: Eje[] = [
   },
 ];
 
-export const membresia = {
-  titulo: '¿Sos profesional del sector eléctrico?',
-  subtitulo: 'Sumá tu talento al IPPSE.',
-  texto: 'Formá parte de la red técnica de referencia que construye el futuro energético de Paraguay.',
-};
-
 export interface EnlaceRapido {
   titulo: string;
   descripcion: string;

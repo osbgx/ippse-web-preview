@@ -4,7 +4,7 @@ descripcion: "Rango estimado del costo de producir un megavatio-hora a lo largo 
 informe: informe-2-26
 forma: rango
 unidad: "USD/MWh"
-orden: 2
+orden: 6
 ---
 Costo nivelado de la energía (LCOE) estimado para cada fuente, en dólares por megavatio-hora.
 Para las binacionales se indica el rango de los proyectos con dato (CORPUS CHRISTI e ITACORÁ-ITATÍ).

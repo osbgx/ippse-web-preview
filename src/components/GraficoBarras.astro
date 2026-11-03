@@ -35,7 +35,7 @@ const rotulo = (f: (typeof filas)[number]) =>
               style={`left:${pct(forma === 'rango' ? f.desde : 0)};width:${pct((forma === 'rango' ? f.hasta - f.desde : f.hasta) || tope * 0.004)}`}
             ></span>
             <span
-              class="absolute inset-y-0 flex items-center pl-2 text-sm font-semibold whitespace-nowrap text-gray-900 tabular-nums"
+              class="grafico-valor absolute inset-y-0 z-10 my-0.5 flex items-center rounded-r bg-gray-50 pr-1 pl-2 text-sm font-semibold whitespace-nowrap text-gray-900 tabular-nums"
               style={`left:${pct(f.hasta)}`}
             >{rotulo(f)}</span>
           </span>
@@ -48,7 +48,15 @@ const rotulo = (f: (typeof filas)[number]) =>
       <span class="hidden sm:block"></span>
       <div class="relative mr-[7.5rem] h-6 border-t border-gray-300 text-xs text-gray-500 tabular-nums">
         {marcas.map((m, i) => (
-          <span class:list={['absolute top-1', i === 0 ? '' : i === marcas.length - 1 ? '-translate-x-full' : '-translate-x-1/2']} style={`left:${pct(m)}`}>
+          <span
+            class:list={[
+              'absolute top-1',
+              i === 0 ? '' : i === marcas.length - 1 ? '-translate-x-full' : '-translate-x-1/2',
+              // En móvil, con cifras de 5 dígitos las marcas se pisan: se muestra una de cada dos.
+              marcas.length > 4 && i % 2 === 1 && 'hidden sm:block',
+            ]}
+            style={`left:${pct(m)}`}
+          >
             {formatoNumero(m)}
           </span>
         ))}

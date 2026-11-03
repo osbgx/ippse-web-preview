@@ -4,7 +4,7 @@ descripcion: "Años estimados desde la decisión hasta que cada fuente entra en 
 informe: informe-2-26
 forma: rango
 unidad: "años"
-orden: 1
+orden: 5
 referencia: 3
 referenciaTexto: "2030: fin del lapso crítico (si se decide en 2027)"
 ---

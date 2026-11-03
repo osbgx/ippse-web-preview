@@ -66,8 +66,6 @@ interface DiccionarioI18n {
     buscar: string;
     menu: string;
     cerrar: string;
-    unirse: string;
-    unirseLargo: string;
   };
   nav: { etiqueta: string; href: string }[];
   alertas: {
@@ -80,7 +78,6 @@ interface DiccionarioI18n {
     secciones: string;
     institucional: string;
     contacto: string;
-    unirse: string;
     canalWhatsApp: string;
     srNuevaPestana: string;
     redes: string;
@@ -126,7 +123,6 @@ interface DiccionarioI18n {
       vision: { titulo: string; texto: string };
       valores: { titulo: string; items: { titulo: string; descripcion: string }[] };
       ejes: { sobretitulo: string; titulo: string; items: { titulo: string; descripcion: string; icono: string }[] };
-      membresia: { titulo: string; subtitulo: string; texto: string; cta: string; href: string };
     };
     nosotros: {
       titulo: string;
@@ -158,7 +154,6 @@ interface DiccionarioI18n {
     };
     contacto: {
       titulo: string;
-      antetitulo: string;
       descripcion: string;
       cita: string;
       datos: { sede: string; email: string; telefono: string };
@@ -166,17 +161,11 @@ interface DiccionarioI18n {
         srTitulo: string;
         avisoEnviado: string;
         avisoError: string;
-        srTipo: string;
-        tabs: { consulta: string; membresia: string };
         consultaPlaceholder: string;
         consultaBoton: string;
-        membresiaPlaceholder: string;
-        membresiaBoton: string;
         nombre: string;
         nombrePlaceholder: string;
         email: string;
-        especialidad: string;
-        especialidadPlaceholder: string;
         mensaje: string;
         honeypot: string;
         obligatorios: string;
@@ -207,8 +196,6 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
       buscar: 'Search',
       menu: 'Menu',
       cerrar: 'Close',
-      unirse: 'Join',
-      unirseLargo: 'Join the IPPSE',
     },
     nav: [
       { etiqueta: 'Home', href: conBase('/en/') },
@@ -221,11 +208,9 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
       etiqueta: 'Breaking news',
       items: [
         { tipo: 'Report', texto: 'Technical Report No. 2/26: alternatives for new generation sources', href: urlVisor('informe-2-26') },
-        { tipo: 'Alert', texto: 'Critical window 2028–2030: risk of power and energy shortfall', href: urlVisor('informe-2-26') },
-        { tipo: 'Alert', texto: 'Projected transmission deficit by 2028', href: hrefAlertas('/prensa/#alerta-deficit-transmision-2028') },
-        { tipo: 'Report', texto: 'Updated supply–demand balance of the national grid (SIN)', href: hrefAlertas('/en/publicaciones/') },
+        { tipo: 'Alert', texto: 'Critical window 2028–2030: risk of power and energy shortfall', href: urlVisor('informe-1-26') },
+        { tipo: 'Report', texto: 'Technical Report No. 1/26: current generation sources', href: urlVisor('informe-1-26') },
         { tipo: 'Event', texto: 'Technical forum on diversifying the electricity generation mix', href: hrefAlertas('/en/prensa/#eventos') },
-        { tipo: 'Statement', texto: 'IPPSE position on the Generation Master Plan', href: hrefAlertas('/prensa/#posicion-plan-maestro') },
       ],
     },
     footer: {
@@ -235,7 +220,6 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
       secciones: 'Sections',
       institucional: 'Institutional documents',
       contacto: 'Contact',
-      unirse: 'Join',
       canalWhatsApp: 'WhatsApp channel',
       srNuevaPestana: '(opens in a new tab)',
       redes: 'Social media',
@@ -368,13 +352,6 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
             { titulo: 'Outreach and Training', descripcion: 'Forums, technical seminars and early-warning reports on the electricity system.', icono: 'lucide:graduation-cap' },
           ],
         },
-        membresia: {
-          titulo: 'Are you a professional in the power sector?',
-          subtitulo: 'Bring your talent to the IPPSE.',
-          texto: 'Join the reference technical network that is shaping the energy future of Paraguay.',
-          cta: 'Request membership',
-          href: conBase('/en/contacto/?tipo=membresia#formulario'),
-        },
       },
       nosotros: {
         titulo: 'About us',
@@ -452,9 +429,8 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
         contador: { comunicados: 'statements', apariciones: 'appearances' },
       },
       contacto: {
-        titulo: 'Contact & Membership',
-        antetitulo: 'Contact / Join',
-        descripcion: 'Contact the IPPSE or apply for membership as a professional of the Paraguayan power sector.',
+        titulo: 'Contact',
+        descripcion: 'Contact the Institute of Paraguayan Professionals of the Electrical Sector (IPPSE): inquiries, press and institutions.',
         cita:
           'Paraguay’s energy sovereignty is built on long-term planning, technical rigor and the convergence of professional talent within the sector.',
         datos: { sede: 'Headquarters', email: 'Email', telefono: 'Phone' },
@@ -462,21 +438,15 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
           srTitulo: 'Contact form',
           avisoEnviado: 'Message sent. We will reply shortly.',
           avisoError: 'The message could not be sent. Please check the details or write us directly at',
-          srTipo: 'Type of message',
-          tabs: { consulta: 'General inquiry', membresia: 'Membership application' },
           consultaPlaceholder: 'How can we help you?',
           consultaBoton: 'Send message',
-          membresiaPlaceholder: 'Tell us about your professional background and your motivation for joining the IPPSE.',
-          membresiaBoton: 'Send application',
           nombre: 'Full name',
           nombrePlaceholder: 'Your name',
           email: 'Email',
-          especialidad: 'Specialty / Sector area',
-          especialidadPlaceholder: 'E.g.: electrical engineering, energy economics, law…',
           mensaje: 'Message',
           honeypot: 'Do not fill in',
           obligatorios: 'Required fields',
-          privacidad: 'We only use your data to reply to you or to assess your membership application. More information in our',
+          privacidad: 'We only use your data to reply to you. More information in our',
           privacidadEnlace: 'privacy policy',
           srNuevaPestana: '(opens in a new tab)',
         },
@@ -498,8 +468,6 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
       buscar: 'Buscar',
       menu: 'Menu',
       cerrar: 'Fechar',
-      unirse: 'Entrar no IPPSE',
-      unirseLargo: 'Entrar no IPPSE',
     },
     nav: [
       { etiqueta: 'Início', href: conBase('/pt/') },
@@ -512,11 +480,9 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
       etiqueta: 'Últimas notícias',
       items: [
         { tipo: 'Relatório', texto: 'Relatório Técnico nº 2/26: alternativas de novas fontes de geração', href: urlVisor('informe-2-26') },
-        { tipo: 'Alerta', texto: 'Janela crítica 2028–2030: risco de déficit de potência e energia', href: urlVisor('informe-2-26') },
-        { tipo: 'Alerta', texto: 'Déficit de transmissão projetado para 2028', href: hrefAlertas('/prensa/#alerta-deficit-transmision-2028') },
-        { tipo: 'Relatório', texto: 'Balanço oferta-demanda do SIN atualizado', href: hrefAlertas('/pt/publicaciones/') },
+        { tipo: 'Alerta', texto: 'Janela crítica 2028–2030: risco de déficit de potência e energia', href: urlVisor('informe-1-26') },
+        { tipo: 'Relatório', texto: 'Relatório Técnico nº 1/26: fontes de geração atuais', href: urlVisor('informe-1-26') },
         { tipo: 'Evento', texto: 'Fórum técnico sobre a diversificação da matriz de geração elétrica', href: hrefAlertas('/pt/prensa/#eventos') },
-        { tipo: 'Comunicado', texto: 'Posição do IPPSE sobre o Plano Diretor de Geração', href: hrefAlertas('/prensa/#posicion-plan-maestro') },
       ],
     },
     footer: {
@@ -526,7 +492,6 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
       secciones: 'Seções',
       institucional: 'Documentos institucionais',
       contacto: 'Contato',
-      unirse: 'Entrar no IPPSE',
       canalWhatsApp: 'Canal do WhatsApp',
       srNuevaPestana: '(abre em uma nova aba)',
       redes: 'Redes sociais',
@@ -659,13 +624,6 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
             { titulo: 'Divulgação e Capacitação', descripcion: 'Fóruns, seminários técnicos e relatórios de alerta precoce sobre o sistema elétrico.', icono: 'lucide:graduation-cap' },
           ],
         },
-        membresia: {
-          titulo: 'Você é profissional do setor elétrico?',
-          subtitulo: 'Some seu talento ao IPPSE.',
-          texto: 'Faça parte da rede técnica de referência que constrói o futuro energético do Paraguai.',
-          cta: 'Solicitar associação',
-          href: conBase('/pt/contacto/?tipo=membresia#formulario'),
-        },
       },
       nosotros: {
         titulo: 'Quem somos',
@@ -727,30 +685,23 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
         contador: { comunicados: 'comunicados', apariciones: 'aparições' },
       },
       contacto: {
-        titulo: 'Contato e Associação',
-        antetitulo: 'Contato / Associar-se',
-        descripcion: 'Fale com o IPPSE ou solicite sua associação como profissional do setor elétrico paraguaio.',
+        titulo: 'Contato',
+        descripcion: 'Fale com o Instituto de Profissionais Paraguaios do Setor Elétrico (IPPSE): consultas, imprensa e instituições.',
         cita: 'A soberania energética do Paraguai se constrói com planejamento de longo prazo, rigor técnico e a convergência do talento profissional do setor.',
         datos: { sede: 'Sede', email: 'E-mail', telefono: 'Telefone' },
         form: {
           srTitulo: 'Formulário de contato',
           avisoEnviado: 'Mensagem enviada. Responderemos o mais breve possível.',
           avisoError: 'Não foi possível enviar a mensagem. Verifique os dados ou escreva-nos diretamente para',
-          srTipo: 'Tipo de mensagem',
-          tabs: { consulta: 'Consulta geral', membresia: 'Solicitação de associação' },
           consultaPlaceholder: 'Como podemos ajudar você?',
           consultaBoton: 'Enviar mensagem',
-          membresiaPlaceholder: 'Conte sobre sua trajetória profissional e sua motivação para entrar no IPPSE.',
-          membresiaBoton: 'Enviar solicitação',
           nombre: 'Nome completo',
           nombrePlaceholder: 'Seu nome',
           email: 'E-mail',
-          especialidad: 'Especialidade / área do setor',
-          especialidadPlaceholder: 'Ex.: engenharia elétrica, economia da energia, direito…',
           mensaje: 'Mensagem',
           honeypot: 'Não preencher',
           obligatorios: 'Campos obrigatórios',
-          privacidad: 'Usamos seus dados apenas para responder você ou avaliar sua associação. Mais informações na',
+          privacidad: 'Usamos seus dados apenas para responder você. Mais informações na',
           privacidadEnlace: 'política de privacidade',
           srNuevaPestana: '(abre em uma nova aba)',
         },

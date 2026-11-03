@@ -5,12 +5,11 @@ import LayoutBase from '../layouts/LayoutBase.astro';
 import TarjetaPublicacion from '../components/TarjetaPublicacion.astro';
 import {
   lema, descripcionCorta, presentacionHero, quienesSomos, mision, vision, valores,
-  ejesEstrategicos, membresia, enlacesRapidos,
+  ejesEstrategicos, enlacesRapidos,
 } from '../data/institucion';
 import { getPublicaciones, urlVisor, atributosPdf } from '../data/publicaciones';
 import { informeDestacado } from '../data/informeDestacado';
 import { pdfInforme226 } from '../data/documentos';
-import { enlaceMembresia } from '../data/contacto';
 
 const recientes = (await getPublicaciones()).slice(0, 3);
 ---
@@ -19,12 +18,21 @@ const recientes = (await getPublicaciones()).slice(0, 3);
   <!-- Hero -->
   <section aria-labelledby="hero-titulo" class="relative overflow-hidden border-b border-gray-200 bg-white">
     <div class="absolute inset-y-0 right-0 hidden w-1/2 lg:block" aria-hidden="true">
-      <img
-        src={conBase('/assets/power-paraguay/22a32298a_generated_43a648f3.webp')}
-        alt=""
-        class="h-full w-full object-cover"
-        loading="lazy"
-      />
+      <picture>
+        <source
+          media="(min-width: 1024px)"
+          srcset={`${conBase('/assets/power-paraguay/lineas-transmision-800.webp')} 800w, ${conBase('/assets/power-paraguay/22a32298a_generated_43a648f3.webp')} 1200w`}
+          sizes="50vw"
+        />
+        <img
+          src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+          alt=""
+          width="1200"
+          height="800"
+          class="h-full w-full object-cover"
+          fetchpriority="high"
+        />
+      </picture>
       <div class="absolute inset-0 bg-gradient-to-r from-white via-white/60 to-transparent"></div>
     </div>
     <div class="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-24 lg:px-8">
@@ -72,14 +80,26 @@ const recientes = (await getPublicaciones()).slice(0, 3);
     <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
       <!-- Imagen de fondo: represa de Itaipú -->
       <div class="relative mb-8 overflow-hidden rounded-lg">
-        <img
-          src={conBase('/assets/power-paraguay/726c04d4d_generated_f07a7368.webp')}
-          alt="Represa de Itaipú al atardecer"
-          width="1024"
-          height="1024"
-          class="h-48 w-full object-cover sm:h-64"
-          loading="lazy"
-        />
+        <!-- Recortes a la medida de la banda: 1,9:1 en móvil y 4,7:1 desde 640 px -->
+        <picture>
+          <source
+            media="(min-width: 640px)"
+            srcset={conBase('/assets/power-paraguay/itaipu-banda-1024.webp')}
+            width="1024"
+            height="218"
+          />
+          <img
+            src={conBase('/assets/power-paraguay/itaipu-banda-movil-640.webp')}
+            srcset={`${conBase('/assets/power-paraguay/itaipu-banda-movil-640.webp')} 640w, ${conBase('/assets/power-paraguay/itaipu-banda-movil-768.webp')} 768w, ${conBase('/assets/power-paraguay/itaipu-banda-movil-1024.webp')} 1024w`}
+            sizes="100vw"
+            alt="Represa de Itaipú al atardecer"
+            width="640"
+            height="344"
+            class="h-48 w-full object-cover sm:h-64"
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
         <p class="absolute bottom-4 left-4 font-serif text-lg font-semibold text-white sm:text-xl">
           El Paraguay necesita nueva generación eléctrica desde 2028
@@ -229,7 +249,9 @@ const recientes = (await getPublicaciones()).slice(0, 3);
     <div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
       <div class="relative overflow-hidden rounded-lg">
         <img
-          src={conBase('/assets/power-paraguay/390840802_generated_d56ac8c6.webp')}
+          src={conBase('/assets/power-paraguay/sala-control-800.webp')}
+          srcset={`${conBase('/assets/power-paraguay/sala-control-640.webp')} 640w, ${conBase('/assets/power-paraguay/sala-control-800.webp')} 800w, ${conBase('/assets/power-paraguay/390840802_generated_d56ac8c6.webp')} 1200w`}
+          sizes="(min-width: 1024px) 50vw, 100vw"
           alt="Sala de control eléctrico"
           width="1200"
           height="800"
@@ -287,18 +309,4 @@ const recientes = (await getPublicaciones()).slice(0, 3);
     </div>
   </section>
 
-  <!-- Membresía -->
-  <section aria-labelledby="membresia-titulo" class="mx-auto max-w-7xl px-4 pt-4 sm:px-6 md:pt-8 lg:px-8">
-    <div class="flex flex-col items-start justify-between gap-6 rounded border-l-8 border-py-rojo bg-py-azul p-6 text-white sm:p-10 md:flex-row md:items-center">
-      <div>
-        <h2 id="membresia-titulo" class="text-2xl font-bold text-white sm:text-3xl">
-          {membresia.titulo} <span class="block text-py-azul-claro">{membresia.subtitulo}</span>
-        </h2>
-        <p class="mt-3 max-w-2xl text-gray-100">{membresia.texto}</p>
-      </div>
-      <a href={enlaceMembresia} class="font-serif w-full shrink-0 rounded bg-white px-6 py-3 text-center font-semibold md:w-auto text-py-azul no-underline hover:bg-py-azul-claro">
-        Solicitar membresía
-      </a>
-    </div>
-  </section>
 </LayoutBase>

@@ -4,7 +4,7 @@ descripcion: "Potencia de los 22 emplazamientos identificados en ríos interiore
 informe: informe-2-26
 forma: barras
 unidad: "MW"
-orden: 4
+orden: 8
 ---
 Potencia instalable en ríos interiores por cuenca, en megavatios (cuencas con emplazamientos identificados).
 

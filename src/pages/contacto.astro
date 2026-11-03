@@ -7,16 +7,6 @@ import EncabezadoPagina from '../components/EncabezadoPagina.astro';
 import { citaPresidente } from '../data/institucion';
 import { contacto, telefonoEnlace, accionFormulario, redesSociales } from '../data/contacto';
 
-const tipos = [
-  { valor: 'consulta', etiqueta: 'Consulta general', placeholder: '¿En qué podemos ayudarte?', boton: 'Enviar mensaje' },
-  {
-    valor: 'membresia',
-    etiqueta: 'Solicitud de membresía',
-    placeholder: 'Contanos sobre tu trayectoria profesional y motivación para unirte al IPPSE.',
-    boton: 'Enviar solicitud',
-  },
-];
-
 const datos = [
   { etiqueta: 'Sede', valor: contacto.direccion ? `${contacto.direccion}, ${contacto.ciudad}` : contacto.ciudad },
   ...redesSociales.map(({ nombre, href }) => ({ etiqueta: nombre, valor: href.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''), href })),
@@ -31,10 +21,10 @@ const etiquetaCampo = 'text-sm font-semibold text-gray-800';
 ---
 
 <LayoutBase
-  titulo="Contacto y Membresía"
-  descripcion="Contactá al IPPSE o solicitá tu membresía como profesional del sector eléctrico paraguayo."
+  titulo="Contacto"
+  descripcion="Contactá al Instituto de Profesionales Paraguayos del Sector Eléctrico (IPPSE): consultas, prensa e instituciones."
 >
-  <EncabezadoPagina titulo="Contacto y Membresía" antetitulo="Contacto / Unirse" />
+  <EncabezadoPagina titulo="Contacto" />
 
   <div class="mx-auto grid grid-cols-1 max-w-7xl gap-10 px-4 py-10 sm:px-6 md:py-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16 lg:px-8">
     <!-- Cita y datos de contacto -->
@@ -72,20 +62,7 @@ const etiquetaCampo = 'text-sm font-semibold text-gray-800';
         <a href={`mailto:${contacto.email}`}>{contacto.email}</a>.
       </div>
 
-      <form method="post" action={accionFormulario} class="formulario-contacto space-y-5" data-formulario>
-        <!-- Pestañas: radios nativos (funcionan sin JS y son accesibles por teclado) -->
-        <fieldset>
-          <legend class="sr-only">Tipo de mensaje</legend>
-          <div class="grid grid-cols-2 gap-1 rounded bg-gray-100 p-1">
-            {tipos.map(({ valor, etiqueta }, i) => (
-              <label class="font-serif flex min-h-11 cursor-pointer items-center justify-center rounded px-2 text-center text-sm font-semibold text-gray-600 has-checked:bg-py-azul has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-py-azul">
-                <input type="radio" name="tipo" value={valor} checked={i === 0} class="sr-only" />
-                {etiqueta}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
+      <form method="post" action={accionFormulario} class="space-y-5" data-formulario>
         <div>
           <label for="nombre" class={etiquetaCampo}>Nombre completo <span class="text-py-rojo" aria-hidden="true">*</span></label>
           <input id="nombre" name="nombre" type="text" required autocomplete="name" maxlength="120" placeholder="Tu nombre" class={campo} />
@@ -96,14 +73,9 @@ const etiquetaCampo = 'text-sm font-semibold text-gray-800';
           <input id="email" name="email" type="email" required autocomplete="email" maxlength="160" placeholder="tu@email.com" class={campo} />
         </div>
 
-        <div class="solo-membresia">
-          <label for="especialidad" class={etiquetaCampo}>Especialidad / Área del sector <span class="text-py-rojo" aria-hidden="true">*</span></label>
-          <input id="especialidad" name="especialidad" type="text" maxlength="160" placeholder="Ej: Ingeniería eléctrica, economía energética, derecho..." class={campo} />
-        </div>
-
         <div>
           <label for="mensaje" class={etiquetaCampo}>Mensaje <span class="text-py-rojo" aria-hidden="true">*</span></label>
-          <textarea id="mensaje" name="mensaje" required rows="5" maxlength="5000" placeholder={tipos[0].placeholder} class={campo} data-placeholders={JSON.stringify(Object.fromEntries(tipos.map((t) => [t.valor, t.placeholder])))}></textarea>
+          <textarea id="mensaje" name="mensaje" required rows="5" maxlength="5000" placeholder="¿En qué podemos ayudarte?" class={campo}></textarea>
         </div>
 
         <!-- Anti-spam: trampa invisible, tiempo mínimo y (opcional) Turnstile -->
@@ -111,12 +83,12 @@ const etiquetaCampo = 'text-sm font-semibold text-gray-800';
 
         <p class="text-xs text-gray-500"><span class="text-py-rojo" aria-hidden="true">*</span> Campos obligatorios</p>
         <p class="text-xs text-gray-500">
-          Usamos tus datos solo para responderte o evaluar tu membresía. Más información en la{" "}
+          Usamos tus datos solo para responderte. Más información en la{" "}
           <a href={conBase('/privacidad/')}>política de privacidad</a>.
         </p>
 
         <button type="submit" class="font-serif flex min-h-12 w-full items-center justify-center gap-2 rounded bg-py-azul px-6 font-semibold text-white hover:bg-py-azul-oscuro sm:w-auto" data-boton-enviar>
-          <span data-boton-texto>{tipos[0].boton}</span>
+          Enviar mensaje
           <Icon name="lucide:send" class="h-4 w-4" aria-hidden="true" />
         </button>
       </form>
@@ -125,30 +97,8 @@ const etiquetaCampo = 'text-sm font-semibold text-gray-800';
 </LayoutBase>
 
 <script>
-  const form = document.querySelector<HTMLFormElement>('[data-formulario]')!;
-  const especialidad = form.querySelector<HTMLInputElement>('#especialidad')!;
-  const mensaje = form.querySelector<HTMLTextAreaElement>('#mensaje')!;
-  const textoBoton = form.querySelector<HTMLElement>('[data-boton-texto]')!;
-  const placeholders: Record<string, string> = JSON.parse(mensaje.dataset.placeholders ?? '{}');
-
-  const aplicarTipo = (tipo: string) => {
-    const membresia = tipo === 'membresia';
-    especialidad.required = membresia;
-    mensaje.placeholder = placeholders[tipo] ?? '';
-    textoBoton.textContent = membresia ? 'Enviar solicitud' : 'Enviar mensaje';
-  };
-
-  form.addEventListener('change', (e) => {
-    const radio = e.target as HTMLInputElement;
-    if (radio.name === 'tipo') aplicarTipo(radio.value);
-  });
-
-  // ?tipo=membresia (botón "Unirse") preselecciona la pestaña; ?enviado=1 / ?error=1 los pone el PHP
+  // ?enviado=1 / ?error=1 / ?limite=1 los agrega enviar.php al volver
   const params = new URLSearchParams(location.search);
-  const tipoInicial = params.get('tipo') === 'membresia' ? 'membresia' : 'consulta';
-  form.querySelector<HTMLInputElement>(`input[name="tipo"][value="${tipoInicial}"]`)!.checked = true;
-  aplicarTipo(tipoInicial);
-
   for (const aviso of ['enviado', 'error', 'limite']) {
     if (params.get(aviso) === '1') document.querySelector(`[data-aviso="${aviso}"]`)?.classList.remove('hidden');
   }
