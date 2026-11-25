@@ -1,0 +1,47 @@
+---
+// Video de YouTube con "fachada": se muestra la miniatura (servida por el sitio) y
+// YouTube recién se carga al hacer clic, desde youtube-nocookie.com. Así la página
+// no paga el peso del reproductor ni entrega cookies de terceros hasta que el
+// visitante decide ver el video. Sin JavaScript, el enlace abre el video en YouTube.
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  id: string;
+  titulo: string;
+  miniatura: string;
+  class?: string;
+}
+
+const { id, titulo, miniatura, class: clase } = Astro.props;
+const enlace = `https://www.youtube.com/watch?v=${id}`;
+---
+
+<div class:list={['video-yt relative aspect-video overflow-hidden rounded-lg bg-gray-900', clase]} data-video-yt={id} data-titulo={titulo}>
+  <a href={enlace} target="_blank" rel="noopener" class="group absolute inset-0 block" aria-label={`Reproducir el video «${titulo}»`}>
+    <img src={miniatura} alt="" width="640" height="360" loading="lazy" decoding="async" class="h-full w-full object-cover" />
+    <span class="absolute inset-0 flex items-center justify-center bg-gray-900/15 transition-colors group-hover:bg-gray-900/30">
+      <span class="flex h-16 w-16 items-center justify-center rounded-full bg-py-rojo text-white shadow-lg transition-transform group-hover:scale-110 sm:h-20 sm:w-20">
+        <Icon name="lucide:play" class="ml-1 h-8 w-8 fill-current sm:h-10 sm:w-10" aria-hidden="true" />
+      </span>
+    </span>
+  </a>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-video-yt]').forEach((caja) => {
+    caja.querySelector('a')?.addEventListener('click', (evento) => {
+      // Ctrl/Cmd+clic o clic central: se respeta abrir en otra pestaña.
+      if (evento.ctrlKey || evento.metaKey || evento.shiftKey || evento.button !== 0) return;
+      evento.preventDefault();
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${caja.dataset.videoYt}?autoplay=1&rel=0`;
+      iframe.title = caja.dataset.titulo ?? 'Video';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.allowFullscreen = true;
+      iframe.className = 'absolute inset-0 h-full w-full border-0';
+      caja.replaceChildren(iframe);
+      iframe.focus();
+    });
+  });
+</script>

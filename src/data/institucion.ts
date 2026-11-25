@@ -1,7 +1,7 @@
 // Textos institucionales: copiados literalmente del sitio original del IPPSE. Editar libremente.
 
 import { conBase } from '../lib/rutas';
-import { citaPresidenteSitio, equipoSitio } from './contenidoSitio';
+import { citaPresidenteSitio, comisionDirectivaSitio, equipoSitio } from './contenidoSitio';
 export const fundacion = '23 de abril de 1993';
 
 export const lema = 'Promoviendo la soberanía, la seguridad y la sostenibilidad energética de Paraguay.';
@@ -16,7 +16,7 @@ export const presentacionHero = `${lema} Somos una asociación civil técnica e 
 export const quienesSomos = {
   titulo: 'El puente entre la experiencia técnica y las políticas de Estado',
   parrafos: [
-    'El IPPSE reúne al talento técnico y profesional más calificado de la ingeniería y el sector eléctrico paraguayo. ' +
+    'El IPPSE reúne al talento técnico y profesional del sector eléctrico paraguayo. ' +
       'Ante el crecimiento acelerado de la demanda energética y los desafíos de transmisión, distribución y generación, ' +
       'el instituto actúa como un puente entre la experiencia técnica, la opinión pública y las políticas de Estado.',
   ],
@@ -35,12 +35,11 @@ export const historia = {
 
 export const mision =
   'Fomentar el desarrollo sostenible y eficiente del sistema eléctrico paraguayo mediante el análisis riguroso, ' +
-  'la investigación aplicada, el debate especializado y la formulación de recomendaciones estratégicas para la ' +
-  'política energética nacional.';
+  'la investigación aplicada, el debate especializado y la formulación de recomendaciones estratégicas.';
 
 export const vision =
-  'Ser el organismo civil de referencia técnica y científica en materia energética en Paraguay, impulsando la ' +
-  'planificación a largo plazo, la diversificación de la matriz eléctrica y la soberanía energética.';
+  'Ser el organismo civil de referencia técnica y científica en materia de energía eléctrica en Paraguay, ' +
+  'impulsando la planificación a largo plazo.';
 
 export const valores = [
   { titulo: 'Independencia', descripcion: 'Análisis técnico libre de condicionamientos políticos o comerciales.' },
@@ -69,6 +68,34 @@ const equipoPorDefecto = [
 ];
 
 export const equipo = equipoSitio ?? equipoPorDefecto;
+
+// Comité Ejecutivo: se edita en contenido/sitio/comision-directiva.md. Respaldo:
+export const comisionDirectiva = comisionDirectivaSitio ?? {
+  titulo: 'Comité Ejecutivo',
+  periodo: '30.04.2026 - 30.04.2027',
+  cargos: [
+    { cargo: 'Presidente', nombres: ['Ing. Ángel María Recalde'] },
+    { cargo: 'Vicepresidente', nombres: ['Ing. Osvaldo Román Romei'] },
+    { cargo: 'Secretario', nombres: ['Lic. Luis Viveros Gómez'] },
+    {
+      cargo: 'Vocales Titulares',
+      nombres: [
+        'Ing. Carlos Rodiño Gorostiaga',
+        'Ing. Oscar Ruiz Díaz Andrada',
+        'Ing. Sixto Luis Duré Benítez',
+        'Ing. Guillermo Krauch Riera',
+      ],
+    },
+    { cargo: 'Vocales Suplentes', nombres: ['Ing. Andrés Ovidio Macchi Ayala', 'Ing. Victor Álvarez'] },
+  ],
+};
+
+/** Video institucional (YouTube). */
+export const videoInstitucional = {
+  id: 'a8t0Ps5Veqo',
+  titulo: 'Futuro energético',
+  miniatura: '/assets/video/futuro-energetico-640.webp',
+};
 
 /**
  * Foto oficial del presidente para el kit de prensa: ruta en public/ (p. ej.

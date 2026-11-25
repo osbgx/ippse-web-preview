@@ -3,6 +3,7 @@
 //   ultima-hora.md        -> cinta "Última hora" (alertas.ts)
 //   informe-destacado.md  -> bloque del informe en Inicio (informeDestacado.ts)
 //   equipo.md             -> referentes y cita del presidente (institucion.ts)
+//   comision-directiva.md -> Comité Ejecutivo y su periodo (institucion.ts)
 //
 // Se leen una sola vez (top-level await) y los módulos de datos exponen los mismos
 // nombres de siempre, así ninguna página cambia. Si un archivo falta o no se puede
@@ -96,6 +97,21 @@ export const equipoSitio = leer('equipo', (e) =>
     'Falta la tabla del equipo.',
   ),
 );
+
+// --- Comité Ejecutivo (comision-directiva.md) ---------------------------------
+
+export const comisionDirectivaSitio = leer('comision-directiva', (e) => {
+  const { titulo, periodo } = e.data as { titulo: string; periodo?: string };
+  const filas = exigir(filasDeTabla(e.body ?? ''), 'Falta la tabla Cargo | Nombre.');
+  const cargos: { cargo: string; nombres: string[] }[] = [];
+  for (const [cargo, nombre] of filas) {
+    if (!cargo || !nombre) throw new Error('Cada fila necesita Cargo y Nombre.');
+    const grupo = cargos.find((c) => c.cargo === cargo);
+    if (grupo) grupo.nombres.push(nombre);
+    else cargos.push({ cargo, nombres: [nombre] });
+  }
+  return { titulo, periodo: periodo ?? '', cargos };
+});
 
 export const citaPresidenteSitio = leer('equipo', (e) => {
   const { cita, citaAutor } = e.data as { cita?: string; citaAutor?: string };

@@ -5,8 +5,9 @@ import LayoutBase from '../layouts/LayoutBase.astro';
 import TarjetaPublicacion from '../components/TarjetaPublicacion.astro';
 import {
   lema, descripcionCorta, presentacionHero, quienesSomos, mision, vision, valores,
-  ejesEstrategicos, enlacesRapidos,
+  ejesEstrategicos, enlacesRapidos, videoInstitucional,
 } from '../data/institucion';
+import VideoYouTube from '../components/VideoYouTube.astro';
 import { getPublicaciones, urlVisor, atributosPdf } from '../data/publicaciones';
 import { informeDestacado } from '../data/informeDestacado';
 import { pdfInforme226 } from '../data/documentos';
@@ -242,6 +243,27 @@ const recientes = (await getPublicaciones()).slice(0, 3);
     <ul class="mt-6 grid grid-cols-1 gap-4 sm:gap-6 md:mt-8 md:grid-cols-3">
       {recientes.map((publicacion) => <li><TarjetaPublicacion publicacion={publicacion} /></li>)}
     </ul>
+  </section>
+
+  <!-- Video institucional: la miniatura se ve primero; YouTube carga al hacer clic -->
+  <section aria-labelledby="video-titulo" class="border-y border-gray-200 bg-white">
+    <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-4 py-12 sm:px-6 md:py-16 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-12 lg:px-8">
+      <div>
+        <p class="font-serif text-sm font-semibold text-py-rojo">Video</p>
+        <h2 id="video-titulo" class="mt-3 text-2xl font-bold leading-tight sm:text-3xl">{videoInstitucional.titulo}</h2>
+        <a
+          href={`https://www.youtube.com/watch?v=${videoInstitucional.id}`}
+          target="_blank"
+          rel="noopener"
+          class="mt-4 inline-flex min-h-11 items-center gap-2 font-semibold"
+        >
+          <Icon name="simple-icons:youtube" class="h-5 w-5 text-py-rojo" aria-hidden="true" />
+          Ver en YouTube
+          <span class="sr-only">(abre en una pestaña nueva)</span>
+        </a>
+      </div>
+      <VideoYouTube {...videoInstitucional} miniatura={conBase(videoInstitucional.miniatura)} />
+    </div>
   </section>
 
   <!-- Quiénes somos -->

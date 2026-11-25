@@ -321,18 +321,18 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
           sobretitulo: 'Who we are',
           titulo: 'The bridge between technical expertise and State policies',
           parrafo:
-            'The IPPSE brings together the most qualified technical and professional talent of Paraguayan engineering and the power sector. Faced with the rapid growth of energy demand and the challenges of transmission, distribution and generation, the institute acts as a bridge between technical expertise, public opinion and State policies.',
+            'The IPPSE brings together the technical and professional talent of the Paraguayan power sector. Faced with the rapid growth of energy demand and the challenges of transmission, distribution and generation, the institute acts as a bridge between technical expertise, public opinion and State policies.',
           cta: 'Learn about our history',
         },
         mision: {
           titulo: 'Mission',
           texto:
-            'To foster the sustainable and efficient development of the Paraguayan electricity system through rigorous analysis, applied research, specialized debate and the formulation of strategic recommendations for national energy policy.',
+            'To foster the sustainable and efficient development of the Paraguayan electricity system through rigorous analysis, applied research, specialized debate and the formulation of strategic recommendations.',
         },
         vision: {
           titulo: 'Vision',
           texto:
-            'To be the civil, technical and scientific reference organization on energy matters in Paraguay, promoting long-term planning, diversification of the electricity mix and energy sovereignty.',
+            'To be the civil, technical and scientific reference organization on electric power in Paraguay, promoting long-term planning.',
         },
         valores: {
           titulo: 'Values',
@@ -368,7 +368,7 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
         historia: {
           titulo: 'Technical talent at the service of the Paraguayan power sector',
           parrafos: [
-            'The IPPSE brings together the most qualified technical and professional talent of Paraguayan engineering and the power sector. Faced with the rapid growth of energy demand and the challenges of transmission, distribution and generation, the institute acts as a bridge between technical expertise, public opinion and State policies.',
+            'The IPPSE brings together the technical and professional talent of the Paraguayan power sector. Faced with the rapid growth of energy demand and the challenges of transmission, distribution and generation, the institute acts as a bridge between technical expertise, public opinion and State policies.',
             'We are an independent technical civil association, dedicated to the study, analysis and development of strategic proposals to strengthen the national electricity sector. Our work rests on scientific rigor, energy foresight and a commitment to Paraguay’s energy sovereignty.',
           ],
         },
@@ -379,9 +379,9 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
           mision: 'Mission',
           vision: 'Vision',
           misionTexto:
-            'To foster the sustainable and efficient development of the Paraguayan electricity system through rigorous analysis, applied research, specialized debate and the formulation of strategic recommendations for national energy policy.',
+            'To foster the sustainable and efficient development of the Paraguayan electricity system through rigorous analysis, applied research, specialized debate and the formulation of strategic recommendations.',
           visionTexto:
-            'To be the civil, technical and scientific reference organization on energy matters in Paraguay, promoting long-term planning, diversification of the electricity mix and energy sovereignty.',
+            'To be the civil, technical and scientific reference organization on electric power in Paraguay, promoting long-term planning.',
         },
         valoresItems: [
           { titulo: 'Independence', descripcion: 'Technical analysis free from political or commercial constraints.' },
@@ -593,18 +593,18 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
           sobretitulo: 'Quem somos',
           titulo: 'A ponte entre a experiência técnica e as políticas de Estado',
           parrafo:
-            'O IPPSE reúne o talento técnico e profissional mais qualificado da engenharia e do setor elétrico paraguaio. Diante do crescimento acelerado da demanda energética e dos desafios de transmissão, distribuição e geração, o instituto atua como ponte entre a experiência técnica, a opinião pública e as políticas de Estado.',
+            'O IPPSE reúne o talento técnico e profissional do setor elétrico paraguaio. Diante do crescimento acelerado da demanda energética e dos desafios de transmissão, distribuição e geração, o instituto atua como ponte entre a experiência técnica, a opinião pública e as políticas de Estado.',
           cta: 'Conhecer nossa história',
         },
         mision: {
           titulo: 'Missão',
           texto:
-            'Fomentar o desenvolvimento sustentável e eficiente do sistema elétrico paraguaio por meio de análise rigorosa, pesquisa aplicada, debate especializado e formulação de recomendações estratégicas para a política energética nacional.',
+            'Fomentar o desenvolvimento sustentável e eficiente do sistema elétrico paraguaio por meio de análise rigorosa, pesquisa aplicada, debate especializado e formulação de recomendações estratégicas.',
         },
         vision: {
           titulo: 'Visão',
           texto:
-            'Ser o organismo civil de referência técnica e científica em matéria energética no Paraguai, impulsionando o planejamento de longo prazo, a diversificação da matriz elétrica e a soberania energética.',
+            'Ser o organismo civil de referência técnica e científica em matéria de energia elétrica no Paraguai, impulsionando o planejamento de longo prazo.',
         },
         valores: {
           titulo: 'Valores',
@@ -640,7 +640,7 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
         historia: {
           titulo: 'Talento técnico a serviço do setor elétrico paraguaio',
           parrafos: [
-            'O IPPSE reúne o talento técnico e profissional mais qualificado da engenharia e do setor elétrico paraguaio. Diante do crescimento acelerado da demanda energética e dos desafios de transmissão, distribuição e geração, o instituto atua como ponte entre a experiência técnica, a opinião pública e as políticas de Estado.',
+            'O IPPSE reúne o talento técnico e profissional do setor elétrico paraguaio. Diante do crescimento acelerado da demanda energética e dos desafios de transmissão, distribuição e geração, o instituto atua como ponte entre a experiência técnica, a opinião pública e as políticas de Estado.',
             'Somos uma associação civil técnica e independente, dedicada ao estudo, à análise e ao desenvolvimento de propostas estratégicas para o fortalecimento do setor elétrico nacional. Nosso trabalho se fundamenta no rigor científico, na prospectiva energética e no compromisso com a soberania energética do Paraguai.',
           ],
         },
@@ -650,8 +650,8 @@ export const diccionarios: Record<'en' | 'pt', DiccionarioI18n> = {
         misionVision: {
           mision: 'Missão',
           vision: 'Visão',
-          misionTexto: 'Fomentar o desenvolvimento sustentável e eficiente do sistema elétrico paraguaio por meio de análise rigorosa, pesquisa aplicada, debate especializado e formulação de recomendações estratégicas para a política energética nacional.',
-          visionTexto: 'Ser o organismo civil de referência técnica e científica em matéria energética no Paraguai, impulsionando o planejamento de longo prazo, a diversificação da matriz elétrica e a soberania energética.',
+          misionTexto: 'Fomentar o desenvolvimento sustentável e eficiente do sistema elétrico paraguaio por meio de análise rigorosa, pesquisa aplicada, debate especializado e formulação de recomendações estratégicas.',
+          visionTexto: 'Ser o organismo civil de referência técnica e científica em matéria de energia elétrica no Paraguai, impulsionando o planejamento de longo prazo.',
         },
         valoresItems: [
           { titulo: 'Independência', descripcion: 'Análise técnica livre de condicionamentos políticos ou comerciais.' },

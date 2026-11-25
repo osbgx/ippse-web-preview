@@ -64,7 +64,7 @@ AddCharset UTF-8 .txt .xml .webmanifest .json
   #   challenges.cloudflare.com -> Turnstile (anti-spam, opcional)
   #   __UMAMI_ORIGEN__          -> estadísticas (lo completa scripts/ajustar-htaccess.mjs en el build)
   # 'unsafe-inline' en scripts: Astro inserta scripts chicos en línea. 'wasm-unsafe-eval': el buscador (Pagefind).
-  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com __UMAMI_ORIGEN__; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https://raw.githubusercontent.com; font-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://raw.githubusercontent.com https://api.github.com https://cdn.jsdelivr.net __UMAMI_ORIGEN__; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com __UMAMI_ORIGEN__; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https://raw.githubusercontent.com; font-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://raw.githubusercontent.com https://api.github.com https://cdn.jsdelivr.net __UMAMI_ORIGEN__; frame-src https://challenges.cloudflare.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
 
   # Caché: los archivos de /_astro/ llevan hash en el nombre (cambian de nombre si cambian)
   <If "%{REQUEST_URI} =~ m#^/_astro/#">
