@@ -4,10 +4,10 @@ import { Icon } from 'astro-icon/components';
 import { getEntry, render } from 'astro:content';
 import LayoutBase from '../layouts/LayoutBase.astro';
 import EncabezadoPagina from '../components/EncabezadoPagina.astro';
-import { fundacion, historia, mision, vision, valores, equipo, comisionDirectiva, descripcionCorta } from '../data/institucion';
+import { fundacion, historia, mision, vision, valores, comisionDirectiva, descripcionCorta } from '../data/institucion';
 
 const descripcion =
-  'Historia, misión, valores y equipo del Instituto de Profesionales Paraguayos del Sector Eléctrico, ' +
+  'Historia, misión, valores y Comité Ejecutivo del Instituto de Profesionales Paraguayos del Sector Eléctrico, ' +
   'una asociación técnica independiente al servicio del desarrollo energético nacional.';
 
 // Documentos institucionales: se listan a partir de las secciones del Markdown
@@ -66,7 +66,7 @@ const documentos = documento ? (await render(documento)).headings.filter((h) => 
   </section>
 
   <!-- Comité Ejecutivo: cargo a la izquierda, integrantes a la derecha -->
-  <section id="comite-ejecutivo" aria-labelledby="comite-titulo" class="border-t border-gray-200 bg-white">
+  <section id="comite-ejecutivo" aria-labelledby="comite-titulo" class="border-y border-gray-200 bg-white">
     <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
       <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
         <h2 id="comite-titulo" class="text-2xl font-bold sm:text-3xl">{comisionDirectiva.titulo}</h2>
@@ -84,24 +84,6 @@ const documentos = documento ? (await render(documento)).headings.filter((h) => 
           </div>
         ))}
       </dl>
-    </div>
-  </section>
-
-  <!-- Comisión directiva y equipo: filas de un listado, sin numerar (no es una secuencia) -->
-  <section aria-labelledby="equipo-titulo" class="border-y border-gray-200 bg-white">
-    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
-      <h2 id="equipo-titulo" class="text-2xl font-bold sm:text-3xl">Referentes del sector eléctrico</h2>
-      <ul class="mt-8 divide-y divide-gray-200 border-y border-gray-200">
-        {equipo.map(({ nombre, rol, bio }) => (
-          <li class="grid grid-cols-1 gap-1 py-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-10">
-            <div>
-              <h3 class="text-lg font-semibold">{nombre}</h3>
-              <p class="mt-1 text-sm font-semibold text-py-azul">{rol}</p>
-            </div>
-            <p class="leading-relaxed text-gray-600">{bio}</p>
-          </li>
-        ))}
-      </ul>
     </div>
   </section>
 

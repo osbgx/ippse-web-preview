@@ -127,7 +127,7 @@ export const paginasIndexables: PaginaIndexable[] = [
     ruta: '/nosotros/',
     titulo: 'Quiénes Somos',
     descripcion:
-      'Historia, misión, valores y equipo del Instituto de Profesionales Paraguayos del Sector Eléctrico, ' +
+      'Historia, misión, valores y Comité Ejecutivo del Instituto de Profesionales Paraguayos del Sector Eléctrico, ' +
       'una asociación técnica independiente al servicio del desarrollo energético nacional.',
     prioridad: 0.8,
     frecuencia: 'monthly',

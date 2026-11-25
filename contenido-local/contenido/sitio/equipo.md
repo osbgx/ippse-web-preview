@@ -3,8 +3,8 @@ titulo: "Equipo y presidente"
 cita: "La soberanía energética de Paraguay se construye con planificación a largo plazo, rigor técnico y la convergencia del talento profesional del sector."
 citaAutor: "Ing. Ángel María Recalde, Presidente del IPPSE"
 ---
-Integrantes que se muestran en "Referentes del sector eléctrico" (página Nosotros) y en el kit de
-prensa. La **primera fila es el presidente**. La cita de la cabecera aparece en Contacto y en el kit de prensa.
+Integrantes que se muestran en el kit de prensa (el Comité Ejecutivo de la página Nosotros está en
+comision-directiva.md). La **primera fila es el presidente**. La cita de la cabecera aparece en Contacto y en el kit de prensa.
 
 | Nombre | Rol | Descripción |
 |---|---|---|

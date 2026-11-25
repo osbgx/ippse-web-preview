@@ -60,24 +60,6 @@ const inicio = { etiqueta: d.ui.inicio, href: conBase('/pt/') };
     </ul>
   </section>
 
-  <!-- Equipe -->
-  <section aria-labelledby="equipo-titulo" class="border-y border-gray-200 bg-white">
-    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
-      <h2 id="equipo-titulo" class="text-2xl font-bold sm:text-3xl">{t.nombres.equipoTitulo}</h2>
-      <ul class="mt-8 divide-y divide-gray-200 border-y border-gray-200">
-        {t.equipo.map(({ nombre, rol, bio }) => (
-          <li class="grid grid-cols-1 gap-1 py-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-10">
-            <div>
-              <h3 class="text-lg font-semibold">{nombre}</h3>
-              <p class="mt-1 text-sm font-semibold text-py-azul">{rol}</p>
-            </div>
-            <p class="leading-relaxed text-gray-600">{bio}</p>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
-
   <!-- Marco institucional -->
   <section aria-labelledby="marco-titulo" class="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
     <div class="flex flex-wrap items-end justify-between gap-4">
